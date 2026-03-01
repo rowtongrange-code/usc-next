@@ -43,26 +43,27 @@ function CreateCapsule() {
     if (files.length === 0) return alert('Please select at least one file')
     setLoading(true)
     setProgress('Preparing your files...')
-    await sodium.ready
-
-    const key = sodium.randombytes_buf(sodium.crypto_secretbox_KEYBYTES)
-    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
-
-    setProgress('Encrypting your capsule...')
-    const fileData = []
-    for (const file of files) {
-      const bytes = new Uint8Array(await file.arrayBuffer())
-      fileData.push({ name: file.name, type: file.type, data: Array.from(bytes) })
-    }
-
-    const payload = new TextEncoder().encode(JSON.stringify(fileData))
-    const encrypted = sodium.crypto_secretbox_easy(payload, nonce, key)
-    const combined = new Uint8Array(nonce.length + encrypted.length)
-    combined.set(nonce)
-    combined.set(encrypted, nonce.length)
-
-    setProgress('Uploading your capsule...')
+    
     try {
+      await sodium.ready
+
+      const key = sodium.randombytes_buf(sodium.crypto_secretbox_KEYBYTES)
+      const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
+
+      setProgress('Encrypting your capsule...')
+      const fileData = []
+      for (const file of files) {
+        const bytes = new Uint8Array(await file.arrayBuffer())
+        fileData.push({ name: file.name, type: file.type, data: Array.from(bytes) })
+      }
+
+      const payload = new TextEncoder().encode(JSON.stringify(fileData))
+      const encrypted = sodium.crypto_secretbox_easy(payload, nonce, key)
+      const combined = new Uint8Array(nonce.length + encrypted.length)
+      combined.set(nonce)
+      combined.set(encrypted, nonce.length)
+
+      setProgress('Uploading your capsule...')
       const filename = `capsule-${Date.now()}.enc`
       const response = await fetch(`/api/upload`, {
         method: 'POST',
@@ -73,7 +74,11 @@ function CreateCapsule() {
         body: combined,
       })
 
-      if (!response.ok) throw new Error('Upload failed')
+      if (!response.ok) {
+        const errText = await response.text()
+        throw new Error(`Server error: ${errText}`)
+      }
+      
       const { url } = await response.json()
       const keyHex = sodium.to_hex(key)
       const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}#${keyHex}`
@@ -83,6 +88,7 @@ function CreateCapsule() {
       alert('Upload failed: ' + err.message)
       setProgress('')
     }
+    
     setLoading(false)
   }
 
@@ -176,3 +182,10 @@ function OpenCapsule() {
     </div>
   )
 }
+```
+
+Press **Ctrl+S** then commit and push:
+```
+git add .
+git commit -m "Better error handling for mobile debugging"
+git push origin master
