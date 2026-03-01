@@ -182,10 +182,3 @@ function OpenCapsule() {
     </div>
   )
 }
-```
-
-Press **Ctrl+S** then commit and push:
-```
-git add .
-git commit -m "Better error handling for mobile debugging"
-git push origin master
