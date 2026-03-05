@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import sodium from 'libsodium-wrappers'
+import { upload } from '@vercel/blob/client'
 
 export default function Home() {
   const [view, setView] = useState('home')
@@ -43,7 +44,7 @@ function CreateCapsule() {
     if (files.length === 0) return alert('Please select at least one file')
     setLoading(true)
     setProgress('Preparing your files...')
-    
+
     try {
       await sodium.ready
 
@@ -65,30 +66,22 @@ function CreateCapsule() {
 
       setProgress('Uploading your capsule...')
       const filename = `capsule-${Date.now()}.enc`
-      const response = await fetch(`/api/upload`, {
-        method: 'POST',
-        headers: {
-          'x-filename': filename,
-          'Content-Type': 'application/octet-stream',
-        },
-        body: combined,
+
+      const blob = await upload(filename, combined, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+        contentType: 'application/octet-stream',
       })
 
-      if (!response.ok) {
-        const errText = await response.text()
-        throw new Error(`Server error: ${errText}`)
-      }
-      
-      const { url } = await response.json()
       const keyHex = sodium.to_hex(key)
-      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}#${keyHex}`
+      const link = `${window.location.origin}/open?url=${encodeURIComponent(blob.url)}#${keyHex}`
       setProgress('')
       setCapsuleLink(link)
     } catch (err) {
       alert('Upload failed: ' + err.message)
       setProgress('')
     }
-    
+
     setLoading(false)
   }
 
