@@ -52,13 +52,35 @@ function CreateCapsule() {
       const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
 
       setProgress('Encrypting your capsule...')
-      const fileData = []
+
+      // Build a compact binary bundle instead of JSON with Array.from
+      // Format: for each file — 4 bytes name length, name, 4 bytes type length,
+      // type, 8 bytes data length, data
+      const fileBuffers = []
+      let totalSize = 0
       for (const file of files) {
-        const bytes = new Uint8Array(await file.arrayBuffer())
-        fileData.push({ name: file.name, type: file.type, data: Array.from(bytes) })
+        const nameBytes = new TextEncoder().encode(file.name)
+        const typeBytes = new TextEncoder().encode(file.type)
+        const dataBytes = new Uint8Array(await file.arrayBuffer())
+        const nameLen = new Uint32Array([nameBytes.length])
+        const typeLen = new Uint32Array([typeBytes.length])
+        const dataLen = new BigUint64Array([BigInt(dataBytes.length)])
+        fileBuffers.push({ nameLen, nameBytes, typeLen, typeBytes, dataLen, dataBytes })
+        totalSize += 4 + nameBytes.length + 4 + typeBytes.length + 8 + dataBytes.length
       }
 
-      const payload = new TextEncoder().encode(JSON.stringify(fileData))
+      // Write everything into one big buffer
+      const payload = new Uint8Array(totalSize)
+      let offset = 0
+      for (const f of fileBuffers) {
+        payload.set(new Uint8Array(f.nameLen.buffer), offset); offset += 4
+        payload.set(f.nameBytes, offset); offset += f.nameBytes.length
+        payload.set(new Uint8Array(f.typeLen.buffer), offset); offset += 4
+        payload.set(f.typeBytes, offset); offset += f.typeBytes.length
+        payload.set(new Uint8Array(f.dataLen.buffer), offset); offset += 8
+        payload.set(f.dataBytes, offset); offset += f.dataBytes.length
+      }
+
       const encrypted = sodium.crypto_secretbox_easy(payload, nonce, key)
       const combined = new Uint8Array(nonce.length + encrypted.length)
       combined.set(nonce)
@@ -132,10 +154,23 @@ function OpenCapsule() {
       const buffer = await response.arrayBuffer()
       const combined = new Uint8Array(buffer)
       const nonce = combined.slice(0, sodium.crypto_secretbox_NONCEBYTES)
-      const encrypted = combined.slice(sodium.crypto_secretbox_NONCEBYTES)
-      const decrypted = sodium.crypto_secretbox_open_easy(encrypted, nonce, key)
-      const payload = JSON.parse(new TextDecoder().decode(decrypted))
-      setFiles(payload)
+      const ciphertext = combined.slice(sodium.crypto_secretbox_NONCEBYTES)
+      const decrypted = sodium.crypto_secretbox_open_easy(ciphertext, nonce, key)
+
+      // Read the compact binary bundle
+      const parsed = []
+      let offset = 0
+      while (offset < decrypted.length) {
+        const nameLen = new DataView(decrypted.buffer, decrypted.byteOffset + offset, 4).getUint32(0, true); offset += 4
+        const name = new TextDecoder().decode(decrypted.slice(offset, offset + nameLen)); offset += nameLen
+        const typeLen = new DataView(decrypted.buffer, decrypted.byteOffset + offset, 4).getUint32(0, true); offset += 4
+        const type = new TextDecoder().decode(decrypted.slice(offset, offset + typeLen)); offset += typeLen
+        const dataLen = Number(new DataView(decrypted.buffer, decrypted.byteOffset + offset, 8).getBigUint64(0, true)); offset += 8
+        const data = decrypted.slice(offset, offset + dataLen); offset += dataLen
+        parsed.push({ name, type, data })
+      }
+
+      setFiles(parsed)
       setStatus('Capsule opened successfully!')
     } catch(e) {
       setError('Could not open capsule. The link may be invalid.')
@@ -144,8 +179,7 @@ function OpenCapsule() {
   }
 
   function downloadFile(file) {
-    const bytes = new Uint8Array(file.data)
-    const blob = new Blob([bytes], { type: file.type })
+    const blob = new Blob([file.data], { type: file.type })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -175,3 +209,12 @@ function OpenCapsule() {
     </div>
   )
 }
+```
+
+---
+
+**Save with Ctrl+S**, then run your 3 git commands:
+```
+git add .
+git commit -m "fix: efficient binary encoding for large files"
+git push
