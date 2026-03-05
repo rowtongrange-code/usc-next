@@ -209,12 +209,3 @@ function OpenCapsule() {
     </div>
   )
 }
-```
-
----
-
-**Save with Ctrl+S**, then run your 3 git commands:
-```
-git add .
-git commit -m "fix: efficient binary encoding for large files"
-git push
