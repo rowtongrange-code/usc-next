@@ -1,30 +1,25 @@
 import { handleUpload } from '@vercel/blob/client';
 
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const body = await new Promise((resolve, reject) => {
-      let data = '';
-      req.on('data', chunk => { data += chunk; });
-      req.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch { reject(new Error('Invalid JSON')); }
-      });
-      req.on('error', reject);
-    });
-
     const jsonResponse = await handleUpload({
-      body,
+      body: req.body,
       request: req,
       onBeforeGenerateToken: async (pathname) => ({
         allowedContentTypes: ['application/octet-stream'],
-        tokenPayload: JSON.stringify({ pathname }),
       }),
       onUploadCompleted: async ({ blob }) => {
-        console.log('Upload completed:', blob.url);
+        // intentionally empty - no callback needed
       },
     });
 
