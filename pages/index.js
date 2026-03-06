@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import sodium from 'libsodium-wrappers'
-import { upload } from '@vercel/blob/client'
 
 export default function Home() {
   const [view, setView] = useState('home')
@@ -53,9 +52,6 @@ function CreateCapsule() {
 
       setProgress('Encrypting your capsule...')
 
-      // Build a compact binary bundle instead of JSON with Array.from
-      // Format: for each file — 4 bytes name length, name, 4 bytes type length,
-      // type, 8 bytes data length, data
       const fileBuffers = []
       let totalSize = 0
       for (const file of files) {
@@ -69,7 +65,6 @@ function CreateCapsule() {
         totalSize += 4 + nameBytes.length + 4 + typeBytes.length + 8 + dataBytes.length
       }
 
-      // Write everything into one big buffer
       const payload = new Uint8Array(totalSize)
       let offset = 0
       for (const f of fileBuffers) {
@@ -89,14 +84,23 @@ function CreateCapsule() {
       setProgress('Uploading your capsule...')
       const filename = `capsule-${Date.now()}.enc`
 
-      const blob = await upload(filename, combined, {
-        access: 'public',
-        handleUploadUrl: '/api/upload',
-        contentType: 'application/octet-stream',
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'x-filename': filename,
+          'Content-Type': 'application/octet-stream',
+        },
+        body: combined,
       })
 
+      if (!response.ok) {
+        const errText = await response.text()
+        throw new Error(`Server error: ${errText}`)
+      }
+
+      const { url } = await response.json()
       const keyHex = sodium.to_hex(key)
-      const link = `${window.location.origin}/open?url=${encodeURIComponent(blob.url)}#${keyHex}`
+      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}#${keyHex}`
       setProgress('')
       setCapsuleLink(link)
     } catch (err) {
@@ -157,7 +161,6 @@ function OpenCapsule() {
       const ciphertext = combined.slice(sodium.crypto_secretbox_NONCEBYTES)
       const decrypted = sodium.crypto_secretbox_open_easy(ciphertext, nonce, key)
 
-      // Read the compact binary bundle
       const parsed = []
       let offset = 0
       while (offset < decrypted.length) {

@@ -1,4 +1,11 @@
-import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client';
+import { put } from '@vercel/blob';
+
+export const config = {
+  api: {
+    bodyParser: false,
+    responseLimit: false,
+  },
+};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -6,20 +13,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { pathname } = req.body || {};
-    const filename = pathname || `capsule-${Date.now()}.enc`;
+    const filename = req.headers['x-filename'] || `capsule-${Date.now()}.enc`;
 
-    const clientToken = await generateClientTokenFromReadWriteToken({
+    const blob = await put(filename, req, {
+      access: 'public',
       token: process.env.BLOB_READ_WRITE_TOKEN,
-      pathname: filename,
-      onUploadCompleted: {
-        callbackUrl: `https://usc-next.vercel.app/api/upload-complete`,
-      },
+      contentType: 'application/octet-stream',
     });
 
-    return res.status(200).json({ clientToken });
+    return res.status(200).json({ url: blob.url });
   } catch (error) {
-    console.error('Token error:', error);
+    console.error('Upload error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
