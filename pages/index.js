@@ -84,21 +84,14 @@ function CreateCapsule() {
       setProgress('Uploading your capsule...')
       const filename = `capsule-${Date.now()}.enc`
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'x-filename': filename,
-          'Content-Type': 'application/octet-stream',
-        },
-        body: combined,
+     const { upload } = await import('@vercel/blob/client')
+      const blob = await upload(filename, combined, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+        contentType: 'application/octet-stream',
       })
 
-      if (!response.ok) {
-        const errText = await response.text()
-        throw new Error(`Server error: ${errText}`)
-      }
-
-      const { url } = await response.json()
+      const url = blob.url 
       const keyHex = sodium.to_hex(key)
       const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}#${keyHex}`
       setProgress('')
