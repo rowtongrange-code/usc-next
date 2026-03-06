@@ -1,8 +1,9 @@
-import { handleUpload } from '@vercel/blob/client';
+import { put } from '@vercel/blob';
 
 export const config = {
   api: {
-    bodyParser: true,
+    bodyParser: false,
+    responseLimit: '500mb',
   },
 };
 
@@ -12,22 +13,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const jsonResponse = await handleUpload({
-      body: req.body,
-      request: req,
-      onBeforeGenerateToken: async (pathname) => ({
-        allowedContentTypes: ['application/octet-stream'],
-        maximumSizeInBytes: 500 * 1024 * 1024,
-      }),
-      onUploadCompleted: async ({ blob }) => {
-        return;
-      },
+    const filename = req.headers['x-filename'] || `capsule-${Date.now()}.enc`;
+
+    const blob = await put(filename, req, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      contentType: 'application/octet-stream',
     });
 
-    return res.status(200).json(jsonResponse);
+    return res.status(200).json({ url: blob.url });
   } catch (error) {
-    console.error('Token error:', error);
+    console.error('Upload error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
-
