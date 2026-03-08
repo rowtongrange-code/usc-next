@@ -3,7 +3,8 @@ import { put } from '@vercel/blob';
 export const config = {
   api: {
     bodyParser: false,
-    responseLimit: '500mb',
+    responseLimit: false,
+    sizeLimit: false,
   },
 };
 
