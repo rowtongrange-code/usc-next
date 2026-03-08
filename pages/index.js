@@ -85,7 +85,8 @@ function CreateCapsule() {
       setProgress('Uploading your capsule...')
       const filename = `capsule-${Date.now()}.enc`
 
-      const blob = await upload(filename, combined, {
+      const uploadBlob = new Blob([combined], { type: 'application/octet-stream' })
+      const blob = await upload(filename, uploadBlob, {
         access: 'public',
         handleUploadUrl: '/api/upload',
         contentType: 'application/octet-stream',
