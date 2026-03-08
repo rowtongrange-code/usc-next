@@ -6,13 +6,18 @@ export default async function handler(req, res) {
   }
 
   try {
+    const body = req.body;
+
     const jsonResponse = await handleUpload({
-      body: req.body,
-      request: req,
+      body,
+      request: {
+        headers: {
+          origin: req.headers.origin || `https://${req.headers.host}`,
+        },
+      },
       onBeforeGenerateToken: async (pathname) => ({
         allowedContentTypes: ['application/octet-stream'],
         maximumSizeInBytes: 500 * 1024 * 1024,
-        allowedOrigins: ['https://usc-next.vercel.app', 'https://universalsendcapsule.com'],
         tokenPayload: pathname,
       }),
       onUploadCompleted: async ({ blob }) => {
@@ -26,14 +31,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
-```
-
-**Save with Ctrl+S.**
-
----
-
-Then in the terminal:
-```
-git add .
-git commit -m "fix: add allowed origins to blob token"
-git push
