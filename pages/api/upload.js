@@ -1,4 +1,4 @@
-import { put } from '@vercel/blob';
+import { handleUpload } from '@vercel/blob/client';
 
 export const config = {
   api: {
@@ -12,17 +12,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    const filename = `capsule-${Date.now()}.enc`;
-    const blob = await put(filename, req, {
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      contentType: 'application/octet-stream',
-      multipart: true,
+    const body = await new Promise((resolve, reject) => {
+      let data = '';
+      req.on('data', chunk => { data += chunk.toString(); });
+      req.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch(e) { reject(new Error('Invalid JSON')); }
+      });
+      req.on('error', reject);
     });
 
-    return res.status(200).json({ url: blob.url });
+    const jsonResponse = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async (pathname) => ({
+        allowedContentTypes: ['application/octet-stream'],
+        addRandomSuffix: true,
+        tokenPayload: JSON.stringify({}),
+      }),
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        console.log('Upload completed', blob);
+      },
+    });
+
+    return res.status(200).json(jsonResponse);
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Token error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
