@@ -1,10 +1,4 @@
 import { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
 
 export default function Dashboard() {
   const [email, setEmail] = useState('')
@@ -22,17 +16,20 @@ export default function Dashboard() {
     setError('')
 
     try {
-      const { error } = await supabase
-        .from('pro_users')
-        .upsert({
+      const response = await fetch('/api/save-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           email,
           accent_colour: accentColour,
           sender_message: senderMessage,
           notification_email: notificationEmail,
           logo_url: logoUrl,
-        }, { onConflict: 'email' })
+        })
+      })
 
-      if (error) throw error
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error)
       setSaved(true)
     } catch (err) {
       setError('Could not save settings: ' + err.message)
