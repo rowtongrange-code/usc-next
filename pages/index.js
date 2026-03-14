@@ -39,6 +39,7 @@ function CreateCapsule() {
   const [capsuleLink, setCapsuleLink] = useState('')
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState('')
+  const [senderEmail, setSenderEmail] = useState('')
 
   async function createCapsule() {
     if (files.length === 0) return alert('Please select at least one file')
@@ -94,7 +95,8 @@ function CreateCapsule() {
       const url = blobResult.url
 
       const keyHex = sodium.to_hex(key)
-      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}#${keyHex}`
+      const proParam = senderEmail ? `&pro=${encodeURIComponent(senderEmail)}` : ''
+      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}#${keyHex}`
       setProgress('')
       setCapsuleLink(link)
     } catch (err) {
@@ -109,6 +111,17 @@ function CreateCapsule() {
     <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
       <h2>Create a Capsule</h2>
       <p>Select one or more files to seal into your capsule.</p>
+      <div style={{marginBottom:'16px'}}>
+        <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Email (Pro users only)</label>
+        <input
+          type="email"
+          value={senderEmail}
+          onChange={e => setSenderEmail(e.target.value)}
+          placeholder="your@email.com"
+          style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+        />
+        <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>Leave blank for standard capsule</p>
+      </div>
       <input type="file" multiple onChange={e => setFiles(Array.from(e.target.files))} />
       {files.length > 0 && <p>{files.length} file(s) — {(files.reduce((a,f) => a+f.size,0)/1024/1024).toFixed(2)}mb</p>}
       <br/><br/>

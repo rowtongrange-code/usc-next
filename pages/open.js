@@ -5,10 +5,29 @@ export default function OpenPage() {
   const [status, setStatus] = useState('Opening your capsule...')
   const [files, setFiles] = useState([])
   const [error, setError] = useState('')
+  const [branding, setBranding] = useState(null)
 
   useEffect(() => {
-    openCapsule()
+    loadBrandingAndOpen()
   }, [])
+
+  async function loadBrandingAndOpen() {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const proEmail = params.get('pro')
+
+      if (proEmail) {
+        const res = await fetch(`/api/get-branding?email=${encodeURIComponent(proEmail)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setBranding(data)
+        }
+      }
+    } catch(e) {
+      // No branding, use default
+    }
+    await openCapsule()
+  }
 
   async function openCapsule() {
     try {
@@ -44,7 +63,7 @@ export default function OpenPage() {
       }
 
       setFiles(parsed)
-      setStatus('Capsule opened successfully!')
+      setStatus('')
     } catch(e) {
       setError('Could not open capsule. The link may be invalid.')
       setStatus('')
@@ -61,15 +80,30 @@ export default function OpenPage() {
     URL.revokeObjectURL(url)
   }
 
+  const accentColour = branding?.accent_colour || '#1a365d'
+  const brandName = branding?.brand_name || 'Universal Send Capsule'
+
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
-      <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
-        <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+      <header style={{background:accentColour,padding:'20px',textAlign:'center'}}>
+        {branding?.logo_url && (
+          <img src={branding.logo_url} alt="Logo" style={{height:'50px',marginBottom:'10px',display:'block',margin:'0 auto 10px'}} />
+        )}
+        {!branding && (
+          <>
+            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+            <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+          </>
+        )}
       </header>
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
         <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
-          <h2>Open Capsule</h2>
+          {branding?.sender_message && (
+            <div style={{background:'#f7fafc',borderLeft:`4px solid ${accentColour}`,padding:'16px',borderRadius:'6px',marginBottom:'24px'}}>
+              <p style={{margin:0,fontSize:'16px',color:'#2d3748'}}>{branding.sender_message}</p>
+            </div>
+          )}
+          <h2 style={{color:accentColour}}>Your Capsule</h2>
           {status && <p style={{color:'#2b6cb0'}}>{status}</p>}
           {error && <p style={{color:'red'}}>{error}</p>}
           {files.length > 0 && (
@@ -78,10 +112,15 @@ export default function OpenPage() {
               {files.map((file,i) => (
                 <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px',background:'#f7fafc',borderRadius:'6px',marginBottom:'8px'}}>
                   <span>{file.name}</span>
-                  <button onClick={() => downloadFile(file)} style={{background:'#3182ce',color:'white',border:'none',padding:'6px 16px',borderRadius:'6px',cursor:'pointer'}}>Download</button>
+                  <button onClick={() => downloadFile(file)} style={{background:accentColour,color:'white',border:'none',padding:'6px 16px',borderRadius:'6px',cursor:'pointer'}}>Download</button>
                 </div>
               ))}
             </div>
+          )}
+          {branding && (
+            <p style={{marginTop:'32px',textAlign:'center',color:'#999',fontSize:'13px'}}>
+              Delivered by {branding.logo_url ? <img src={branding.logo_url} alt="" style={{height:'16px',verticalAlign:'middle'}} /> : branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a>
+            </p>
           )}
         </div>
       </main>
