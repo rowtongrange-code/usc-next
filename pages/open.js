@@ -64,6 +64,17 @@ export default function OpenPage() {
 
       setFiles(parsed)
       setStatus('')
+
+      // Send open notification if Pro user
+      const params2 = new URLSearchParams(window.location.search)
+      const proEmail = params2.get('pro')
+      if (proEmail) {
+        fetch('/api/send-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationEmail: branding?.notification_email, senderEmail: proEmail })
+        })
+      }
     } catch(e) {
       setError('Could not open capsule. The link may be invalid.')
       setStatus('')
