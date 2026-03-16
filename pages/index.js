@@ -10,9 +10,11 @@ export default function Home() {
       <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
         <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
         <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
-        <div style={{marginTop:'16px',display:'flex',gap:'12px',justifyContent:'center'}}>
+        <div style={{marginTop:'16px',display:'flex',gap:'12px',justifyContent:'center',flexWrap:'wrap'}}>
           <button onClick={() => setView('create')} style={{background:'#3182ce',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>Create Capsule</button>
           <button onClick={() => setView('open')} style={{background:'#2c7a7b',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>Open Capsule</button>
+          <a href="/pro" style={{background:'#d69e2e',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',textDecoration:'none'}}>⭐ Go Pro</a>
+          <a href="/dashboard" style={{background:'#553c9a',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',textDecoration:'none'}}>Dashboard</a>
         </div>
       </header>
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
