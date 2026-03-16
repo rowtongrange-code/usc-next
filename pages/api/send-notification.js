@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     }
 
     await resend.emails.send({
-      from: 'USC <onboarding@resend.dev>',
+      from: 'USC <notifications@universalsendcapsule.com>',
       to: notificationEmail,
       subject: '📦 Your capsule has been opened!',
       html: `
