@@ -2,6 +2,9 @@ import { useState } from 'react'
 
 export default function Dashboard() {
   const [email, setEmail] = useState('')
+  const [checking, setChecking] = useState(false)
+  const [verified, setVerified] = useState(false)
+  const [notSubscribed, setNotSubscribed] = useState(false)
   const [accentColour, setAccentColour] = useState('#3182ce')
   const [senderMessage, setSenderMessage] = useState('')
   const [notificationEmail, setNotificationEmail] = useState('')
@@ -10,8 +13,48 @@ export default function Dashboard() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
-  async function saveSettings() {
+  async function checkSubscription() {
     if (!email) return setError('Please enter your email address')
+    setChecking(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/check-subscriber', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      const data = await response.json()
+
+      if (data.subscribed) {
+        setVerified(true)
+        loadSettings()
+      } else {
+        setNotSubscribed(true)
+      }
+    } catch (err) {
+      setError('Could not verify subscription: ' + err.message)
+    }
+
+    setChecking(false)
+  }
+
+  async function loadSettings() {
+    try {
+      const response = await fetch(`/api/get-branding?email=${encodeURIComponent(email)}`)
+      if (response.ok) {
+        const data = await response.json()
+        setAccentColour(data.accent_colour || '#3182ce')
+        setSenderMessage(data.sender_message || '')
+        setNotificationEmail(data.notification_email || '')
+        setLogoUrl(data.logo_url || '')
+      }
+    } catch (err) {
+      // No existing settings
+    }
+  }
+
+  async function saveSettings() {
     setSaving(true)
     setError('')
 
@@ -31,11 +74,61 @@ export default function Dashboard() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
       setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
     } catch (err) {
       setError('Could not save settings: ' + err.message)
     }
 
     setSaving(false)
+  }
+
+  if (!verified) {
+    return (
+      <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
+        <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
+          <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+          <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Pro Dashboard</p>
+        </header>
+        <main style={{maxWidth:'500px',margin:'40px auto',padding:'0 20px'}}>
+          <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
+            <h2 style={{color:'#1a365d',marginTop:0}}>Access Your Dashboard</h2>
+            <p style={{color:'#666'}}>Enter your email to access your Pro branding settings.</p>
+
+            {notSubscribed && (
+              <div style={{background:'#fff5f5',border:'1px solid #feb2b2',borderRadius:'8px',padding:'16px',marginBottom:'20px'}}>
+                <p style={{color:'#c53030',margin:0}}>No active subscription found for this email.</p>
+                <a href="/pro" style={{color:'#3182ce',display:'block',marginTop:'8px'}}>Subscribe to USC Pro →</a>
+              </div>
+            )}
+
+            <div style={{marginBottom:'20px'}}>
+              <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setNotSubscribed(false) }}
+                placeholder="you@example.com"
+                style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+              />
+            </div>
+
+            {error && <p style={{color:'red',marginBottom:'16px'}}>{error}</p>}
+
+            <button
+              onClick={checkSubscription}
+              disabled={checking}
+              style={{background:'#3182ce',color:'white',border:'none',padding:'14px 32px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',width:'100%'}}
+            >
+              {checking ? 'Checking...' : 'Access Dashboard'}
+            </button>
+
+            <p style={{textAlign:'center',marginTop:'16px'}}>
+              <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
+            </p>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -48,17 +141,6 @@ export default function Dashboard() {
         <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
           <h2 style={{color:'#1a365d',marginTop:0}}>Your Branding Settings</h2>
           <p style={{color:'#666'}}>Customise how your capsules appear to recipients.</p>
-
-          <div style={{marginBottom:'20px'}}>
-            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
-            />
-          </div>
 
           <div style={{marginBottom:'20px'}}>
             <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Logo URL</label>
@@ -118,6 +200,10 @@ export default function Dashboard() {
           >
             {saving ? 'Saving...' : 'Save Branding Settings'}
           </button>
+
+          <p style={{textAlign:'center',marginTop:'16px'}}>
+            <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
+          </p>
         </div>
       </main>
     </div>
