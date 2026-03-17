@@ -9,7 +9,12 @@ export default async function handler(req, res) {
 
   try {
     const { email } = req.body
-    if (!email) return res.status(400).json({ error: 'Email required' })
+  if (!email) return res.status(400).json({ error: 'Email required' })
+  
+  // Owner always has access
+  if (email === 'rowtongrange@gmail.com') {
+    return res.status(200).json({ subscribed: true })
+  }
 
     const customers = await stripe.customers.list({ email, limit: 1 })
 
