@@ -148,6 +148,96 @@ function OpenCapsule() {
   const [status, setStatus] = useState('')
   const [files, setFiles] = useState([])
   const [error, setError] = useState('')
+  const [pastedLink, setPastedLink] = useState('')
+
+  async function openFromPaste() {
+    if (!pastedLink) return setError('Please paste your capsule link first')
+    try {
+      const urlObj = new URL(pastedLink)
+      const capsuleUrl = urlObj.searchParams.get('url')
+      const keyHex = urlObj.hash.slice(1)
+      if (!capsuleUrl || !keyHex) return setError('This does not look like a valid capsule link')
+      await openCapsule(capsuleUrl, keyHex)
+    } catch(e) {
+      setError('This does not look like a valid capsule link')
+    }
+  }
+
+  async function openCapsule(url, keyHex) {
+    try {
+      setStatus('Opening your capsule...')
+      await sodium.ready
+      const key = sodium.from_hex(keyHex)
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Could not fetch capsule')
+      const buffer = await response.arrayBuffer()
+      const combined = new Uint8Array(buffer)
+      const nonce = combined.slice(0, sodium.crypto_secretbox_NONCEBYTES)
+      const ciphertext = combined.slice(sodium.crypto_secretbox_NONCEBYTES)
+      const decrypted = sodium.crypto_secretbox_open_easy(ciphertext, nonce, key)
+
+      const parsed = []
+      let offset = 0
+      while (offset < decrypted.length) {
+        const nameLen = new DataView(decrypted.buffer, decrypted.byteOffset + offset, 4).getUint32(0, true); offset += 4
+        const name = new TextDecoder().decode(decrypted.slice(offset, offset + nameLen)); offset += nameLen
+        const typeLen = new DataView(decrypted.buffer, decrypted.byteOffset + offset, 4).getUint32(0, true); offset += 4
+        const type = new TextDecoder().decode(decrypted.slice(offset, offset + typeLen)); offset += typeLen
+        const dataLen = Number(new DataView(decrypted.buffer, decrypted.byteOffset + offset, 8).getBigUint64(0, true)); offset += 8
+        const data = decrypted.slice(offset, offset + dataLen); offset += dataLen
+        parsed.push({ name, type, data })
+      }
+
+      setFiles(parsed)
+      setStatus('Capsule opened successfully!')
+    } catch(e) {
+      setError('Could not open capsule. The link may be invalid.')
+      setStatus('')
+    }
+  }
+
+  function downloadFile(file) {
+    const blob = new Blob([file.data], { type: file.type })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = file.name
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
+      <h2>Open a Capsule</h2>
+      <div style={{marginBottom:'16px'}}>
+        <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Have a Capsule Link?</label>
+        <input
+          type="text"
+          value={pastedLink}
+          onChange={e => { setPastedLink(e.target.value); setError('') }}
+          placeholder="Paste your capsule link here..."
+          style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+        />
+      </div>
+      <button onClick={openFromPaste} style={{background:'#2c7a7b',color:'white',border:'none',padding:'12px 28px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',width:'100%'}}>
+        🔓 Unseal Capsule
+      </button>
+      {status && <p style={{color:'#2b6cb0',marginTop:12}}>{status}</p>}
+      {error && <p style={{color:'red',marginTop:12}}>{error}</p>}
+      {files.length > 0 && (
+        <div style={{marginTop:'20px'}}>
+          <p>Your capsule contains {files.length} file(s):</p>
+          {files.map((file,i) => (
+            <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px',background:'#f7fafc',borderRadius:'6px',marginBottom:'8px'}}>
+              <span>{file.name}</span>
+              <button onClick={() => downloadFile(file)} style={{background:'#3182ce',color:'white',border:'none',padding:'6px 16px',borderRadius:'6px',cursor:'pointer'}}>Download</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
   async function openFromUrl() {
     const params = new URLSearchParams(window.location.search)
