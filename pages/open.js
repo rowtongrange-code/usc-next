@@ -6,30 +6,63 @@ export default function OpenPage() {
   const [files, setFiles] = useState([])
   const [error, setError] = useState('')
   const [branding, setBranding] = useState(null)
+  const [locked, setLocked] = useState(false)
+  const [unlockTime, setUnlockTime] = useState(null)
+  const [timeLeft, setTimeLeft] = useState(null)
+  const [senderEmail, setSenderEmail] = useState('')
 
   useEffect(() => {
-    loadBrandingAndOpen()
+    loadBrandingAndCheck()
   }, [])
 
-  async function loadBrandingAndOpen() {
+  useEffect(() => {
+    if (!locked || !unlockTime) return
+    const interval = setInterval(() => {
+      const remaining = unlockTime - Date.now()
+      if (remaining <= 0) {
+        clearInterval(interval)
+        setLocked(false)
+        loadCapsule()
+      } else {
+        setTimeLeft(remaining)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [locked, unlockTime])
+
+  async function loadBrandingAndCheck() {
     try {
       const params = new URLSearchParams(window.location.search)
       const proEmail = params.get('pro')
+      const unlock = params.get('unlock')
 
       if (proEmail) {
+        setSenderEmail(proEmail)
         const res = await fetch(`/api/get-branding?email=${encodeURIComponent(proEmail)}`)
         if (res.ok) {
           const data = await res.json()
           setBranding(data)
         }
       }
+
+      if (unlock) {
+        const unlockTimestamp = parseInt(unlock)
+        const remaining = unlockTimestamp - Date.now()
+        if (remaining > 0) {
+          setUnlockTime(unlockTimestamp)
+          setTimeLeft(remaining)
+          setLocked(true)
+          setStatus('')
+          return
+        }
+      }
     } catch(e) {
-      // No branding, use default
+      // continue
     }
-    await openCapsule()
+    await loadCapsule()
   }
 
-  async function openCapsule() {
+  async function loadCapsule() {
     try {
       const params = new URLSearchParams(window.location.search)
       const url = params.get('url')
@@ -40,6 +73,7 @@ export default function OpenPage() {
         return
       }
 
+      setStatus('Opening your capsule...')
       await sodium.ready
       const key = sodium.from_hex(keyHex)
       const response = await fetch(url)
@@ -65,7 +99,6 @@ export default function OpenPage() {
       setFiles(parsed)
       setStatus('')
 
-      // Send open notification if Pro user
       const params2 = new URLSearchParams(window.location.search)
       const proEmail = params2.get('pro')
       if (proEmail) {
@@ -97,14 +130,84 @@ export default function OpenPage() {
     URL.revokeObjectURL(url)
   }
 
+  function formatTimeLeft(ms) {
+    const totalSeconds = Math.floor(ms / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+    return { hours, minutes, seconds }
+  }
+
   const accentColour = branding?.accent_colour || '#1a365d'
-  const brandName = branding?.brand_name || 'Universal Send Capsule'
+
+  if (locked && timeLeft) {
+    const { hours, minutes, seconds } = formatTimeLeft(timeLeft)
+    const unlockDate = new Date(unlockTime).toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' })
+    const unlockTimeStr = new Date(unlockTime).toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' })
+
+    return (
+      <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
+        <header style={{background:accentColour,padding:'20px',textAlign:'center'}}>
+          {branding?.logo_url && (
+            <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
+          )}
+          {!branding && (
+            <>
+              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+              <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+            </>
+          )}
+        </header>
+        <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
+          <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)',textAlign:'center'}}>
+            <div style={{fontSize:'64px',marginBottom:'16px'}}>🔒</div>
+            <h2 style={{color:accentColour,fontSize:'24px'}}>Your Project is Sealed & Ready!</h2>
+            <p style={{color:'#666'}}>The work is finished and waiting for its official debut.</p>
+            <p style={{color:'#666'}}>Access will be granted on <strong>{unlockDate}</strong> at <strong>{unlockTimeStr}</strong> your local time.</p>
+
+            <div style={{display:'flex',gap:'16px',justifyContent:'center',margin:'32px 0'}}>
+              {[
+                { value: String(hours).padStart(2,'0'), label: 'HRS' },
+                { value: String(minutes).padStart(2,'0'), label: 'MIN' },
+                { value: String(seconds).padStart(2,'0'), label: 'SEC' },
+              ].map(({ value, label }) => (
+                <div key={label} style={{textAlign:'center'}}>
+                  <div style={{background:'white',border:`2px solid ${accentColour}`,borderRadius:'8px',padding:'16px 20px',fontSize:'40px',fontWeight:'bold',color:accentColour,minWidth:'70px'}}>
+                    {value}
+                  </div>
+                  <div style={{fontSize:'12px',color:'#999',marginTop:'6px',fontWeight:'bold'}}>{label}</div>
+                </div>
+              ))}
+            </div>
+
+            {branding?.sender_message && (
+              <div style={{background:'#f7fafc',borderLeft:`4px solid ${accentColour}`,padding:'16px',borderRadius:'6px',marginBottom:'24px',textAlign:'left'}}>
+                <p style={{margin:0,color:'#2d3748'}}>{branding.sender_message}</p>
+              </div>
+            )}
+
+            {senderEmail && (
+              <p style={{color:'#999',fontSize:'14px',marginTop:'24px'}}>
+                Need it sooner? <a href={`mailto:${senderEmail}`} style={{color:accentColour}}>Contact {senderEmail} for an early release.</a>
+              </p>
+            )}
+
+            {branding && (
+              <p style={{marginTop:'32px',color:'#999',fontSize:'13px'}}>
+                Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a>
+              </p>
+            )}
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:accentColour,padding:'20px',textAlign:'center'}}>
         {branding?.logo_url && (
-          <img src={branding.logo_url} alt="Logo" style={{height:'50px',marginBottom:'10px',display:'block',margin:'0 auto 10px'}} />
+          <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
         )}
         {!branding && (
           <>
@@ -136,7 +239,7 @@ export default function OpenPage() {
           )}
           {branding && (
             <p style={{marginTop:'32px',textAlign:'center',color:'#999',fontSize:'13px'}}>
-              Delivered by {branding.logo_url ? <img src={branding.logo_url} alt="" style={{height:'16px',verticalAlign:'middle'}} /> : branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a>
+              Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a>
             </p>
           )}
         </div>

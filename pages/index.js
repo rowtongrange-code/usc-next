@@ -38,9 +38,12 @@ function Home_Content() {
 function CreateCapsule() {
   const [files, setFiles] = useState([])
   const [capsuleLink, setCapsuleLink] = useState('')
+  const [unlockLink, setUnlockLink] = useState('')
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState('')
   const [senderEmail, setSenderEmail] = useState('')
+  const [unlockDate, setUnlockDate] = useState('')
+  const [unlockTime, setUnlockTime] = useState('')
 
   async function createCapsule() {
     if (files.length === 0) return alert('Please select at least one file')
@@ -94,10 +97,23 @@ function CreateCapsule() {
       })
 
       const url = blobResult.url
-
       const keyHex = sodium.to_hex(key)
       const proParam = senderEmail ? `&pro=${encodeURIComponent(senderEmail)}` : ''
-      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}#${keyHex}`
+
+      // Handle time lock — convert local time to UTC timestamp
+      let lockParam = ''
+      let unlockLinkGenerated = ''
+      if (senderEmail && unlockDate && unlockTime) {
+        const localDateTime = new Date(`${unlockDate}T${unlockTime}`)
+        const utcTimestamp = localDateTime.getTime()
+        lockParam = `&unlock=${utcTimestamp}`
+
+        // Generate the early unlock link (no lock param)
+        unlockLinkGenerated = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}#${keyHex}`
+        setUnlockLink(unlockLinkGenerated)
+      }
+
+      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}${lockParam}#${keyHex}`
       setProgress('')
       setCapsuleLink(link)
     } catch (err) {
@@ -112,6 +128,7 @@ function CreateCapsule() {
     <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
       <h2>Create a Capsule</h2>
       <p>Select one or more files to seal into your capsule.</p>
+
       <div style={{marginBottom:'16px'}}>
         <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Email (Pro users only)</label>
         <input
@@ -123,6 +140,34 @@ function CreateCapsule() {
         />
         <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>Leave blank for standard capsule</p>
       </div>
+
+      {senderEmail && (
+        <div style={{marginBottom:'16px',padding:'16px',background:'#f7fafc',borderRadius:'8px',border:'1px solid #e2e8f0'}}>
+          <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>⏰ Time Lock (optional)</label>
+          <p style={{color:'#666',fontSize:'13px',marginTop:'0',marginBottom:'12px'}}>Set a date and time when your capsule will unlock. Leave blank for instant access.</p>
+          <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+            <div style={{flex:1}}>
+              <label style={{display:'block',fontSize:'13px',color:'#666',marginBottom:'4px'}}>Unlock Date</label>
+              <input
+                type="date"
+                value={unlockDate}
+                onChange={e => setUnlockDate(e.target.value)}
+                style={{width:'100%',padding:'8px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+              />
+            </div>
+            <div style={{flex:1}}>
+              <label style={{display:'block',fontSize:'13px',color:'#666',marginBottom:'4px'}}>Unlock Time (your local time)</label>
+              <input
+                type="time"
+                value={unlockTime}
+                onChange={e => setUnlockTime(e.target.value)}
+                style={{width:'100%',padding:'8px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <input type="file" multiple onChange={e => setFiles(Array.from(e.target.files))} />
       {files.length > 0 && <p>{files.length} file(s) — {(files.reduce((a,f) => a+f.size,0)/1024/1024).toFixed(2)}mb</p>}
       <br/><br/>
@@ -133,10 +178,22 @@ function CreateCapsule() {
       {capsuleLink && (
         <div style={{marginTop:'20px',padding:'16px',background:'#f0fff4',borderRadius:'8px'}}>
           <p>✅ Your capsule is ready!</p>
-          <textarea readOnly value={capsuleLink} rows={4} style={{width:'100%',padding:'8px',borderRadius:'4px',border:'1px solid #ccc'}}/>
+          <label style={{display:'block',fontWeight:'bold',marginBottom:'4px'}}>Send this link to your recipient:</label>
+          <textarea readOnly value={capsuleLink} rows={4} style={{width:'100%',padding:'8px',borderRadius:'4px',border:'1px solid #ccc',boxSizing:'border-box'}}/>
           <button onClick={() => { navigator.clipboard.writeText(capsuleLink); alert('Link copied!') }} style={{marginTop:'8px',background:'#38a169',color:'white',border:'none',padding:'8px 20px',borderRadius:'6px',cursor:'pointer'}}>
-            Copy Link
+            Copy Recipient Link
           </button>
+
+          {unlockLink && (
+            <div style={{marginTop:'16px',padding:'12px',background:'#fffbeb',borderRadius:'6px',border:'1px solid #f6e05e'}}>
+              <p style={{fontWeight:'bold',margin:'0 0 4px',color:'#744210'}}>🔑 Your Early Unlock Link — Keep this private!</p>
+              <p style={{fontSize:'13px',color:'#744210',margin:'0 0 8px'}}>Use this link to open the capsule early if needed.</p>
+              <textarea readOnly value={unlockLink} rows={3} style={{width:'100%',padding:'8px',borderRadius:'4px',border:'1px solid #f6e05e',boxSizing:'border-box',fontSize:'12px'}}/>
+              <button onClick={() => { navigator.clipboard.writeText(unlockLink); alert('Unlock link copied!') }} style={{marginTop:'8px',background:'#d69e2e',color:'white',border:'none',padding:'8px 20px',borderRadius:'6px',cursor:'pointer'}}>
+                Copy Unlock Link
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
