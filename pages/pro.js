@@ -32,7 +32,8 @@ export default function ProPage() {
             <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Custom sender message</p>
             <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Remove USC branding</p>
             <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ "Delivered by Your Brand" footer</p>
-            <p style={{padding:'12px 0'}}>✅ Open notification email</p>
+            <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Open notification email</p>
+            <p style={{padding:'12px 0'}}>🔒 Time Locked Capsules — seal & reveal on your schedule</p>
           </div>
           <button onClick={handleSubscribe} style={{background:'#3182ce',color:'white',border:'none',padding:'16px 48px',borderRadius:'8px',cursor:'pointer',fontSize:'18px',width:'100%'}}>
             Subscribe for £10/month
