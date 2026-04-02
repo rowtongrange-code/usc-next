@@ -44,6 +44,31 @@ function CreateCapsule() {
   const [senderEmail, setSenderEmail] = useState('')
   const [unlockDate, setUnlockDate] = useState('')
   const [unlockTime, setUnlockTime] = useState('')
+  const [isProVerified, setIsProVerified] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [verifyError, setVerifyError] = useState('')
+
+  async function verifyPro() {
+    if (!senderEmail) return setVerifyError('Please enter your email first')
+    setVerifying(true)
+    setVerifyError('')
+    try {
+      const response = await fetch('/api/check-subscriber', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: senderEmail })
+      })
+      const data = await response.json()
+      if (data.subscribed) {
+        setIsProVerified(true)
+      } else {
+        setVerifyError('No active Pro subscription found for this email.')
+      }
+    } catch (err) {
+      setVerifyError('Could not verify. Please try again.')
+    }
+    setVerifying(false)
+  }
 
   async function createCapsule() {
     if (files.length === 0) return alert('Please select at least one file')
@@ -139,9 +164,21 @@ function CreateCapsule() {
           style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
         />
         <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>Leave blank for standard capsule</p>
+        {senderEmail && !isProVerified && (
+          <div style={{marginTop:'8px'}}>
+            <button onClick={verifyPro} disabled={verifying} style={{background:'#553c9a',color:'white',border:'none',padding:'8px 20px',borderRadius:'6px',cursor:'pointer',fontSize:'14px'}}>
+              {verifying ? 'Verifying...' : '⭐ Verify Pro Access'}
+            </button>
+            {verifyError && <p style={{color:'red',fontSize:'13px',marginTop:'6px'}}>{verifyError}</p>}
+          </div>
+        )}
+        {isProVerified && <p style={{color:'#38a169',fontSize:'13px',marginTop:'6px'}}>✅ Pro access verified!</p>}
       </div>
 
-      {senderEmail && (
+      {isProVerified && (
+```
+
+**Save with Ctrl+S.**
         <div style={{marginBottom:'16px',padding:'16px',background:'#f7fafc',borderRadius:'8px',border:'1px solid #e2e8f0'}}>
           <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>⏰ Time Lock (optional)</label>
           <p style={{color:'#666',fontSize:'13px',marginTop:'0',marginBottom:'12px'}}>Set a date and time when your capsule will unlock. Leave blank for instant access.</p>
