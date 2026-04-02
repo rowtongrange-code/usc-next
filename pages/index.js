@@ -176,9 +176,9 @@ function CreateCapsule() {
       </div>
 
       {isProVerified && (
-```
 
-**Save with Ctrl+S.**
+
+
         <div style={{marginBottom:'16px',padding:'16px',background:'#f7fafc',borderRadius:'8px',border:'1px solid #e2e8f0'}}>
           <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>⏰ Time Lock (optional)</label>
           <p style={{color:'#666',fontSize:'13px',marginTop:'0',marginBottom:'12px'}}>Set a date and time when your capsule will unlock. Leave blank for instant access.</p>
