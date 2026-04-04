@@ -122,9 +122,15 @@ export default function Dashboard() {
               {checking ? 'Checking...' : 'Access Dashboard'}
             </button>
 
-            <p style={{textAlign:'center',marginTop:'16px'}}>
-              <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
-            </p>
+            <div style={{marginTop:'24px',padding:'16px',background:'#f7fafc',borderRadius:'8px',textAlign:'center'}}>
+            <p style={{margin:'0 0 12px',color:'#666',fontSize:'14px'}}>Need to cancel or update your subscription?</p>
+            <a href="https://billing.stripe.com/p/login/cNieV7e3I0XA51rbGw5gc00" target="_blank" style={{display:'inline-block',background:'#e53e3e',color:'white',padding:'10px 24px',borderRadius:'8px',textDecoration:'none',fontSize:'14px'}}>
+              Manage My Subscription
+            </a>
+          </div>
+          <p style={{textAlign:'center',marginTop:'16px'}}>
+            <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
+          </p>
           </div>
         </main>
       </div>

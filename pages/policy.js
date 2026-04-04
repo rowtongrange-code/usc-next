@@ -31,7 +31,10 @@ export default function Policy() {
           </ul>
 
           <div style={{marginTop:'32px',padding:'16px',background:'#f7fafc',borderRadius:'8px'}}>
-            <p style={{margin:0,color:'#666',fontSize:'14px'}}>For support enquiries please contact us at <a href="mailto:support@universalsendcapsule.com" style={{color:'#3182ce'}}>support@universalsendcapsule.com</a></p>
+            <p style={{margin:'0 0 12px',color:'#666',fontSize:'14px'}}>To manage or cancel your subscription, visit the self-service portal:</p>
+            <a href="https://billing.stripe.com/p/login/cNieV7e3I0XA51rbGw5gc00" target="_blank" style={{display:'inline-block',background:'#3182ce',color:'white',padding:'10px 24px',borderRadius:'8px',textDecoration:'none',fontSize:'14px'}}>
+              Manage My Subscription
+            </a>
           </div>
 
           <p style={{textAlign:'center',marginTop:'24px'}}>
