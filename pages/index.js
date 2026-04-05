@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
         <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
         <div style={{marginTop:'16px',display:'flex',gap:'12px',justifyContent:'center',flexWrap:'wrap'}}>
           <button onClick={() => setView('create')} style={{background:'#3182ce',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>Create Capsule</button>

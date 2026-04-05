@@ -2,7 +2,7 @@ export default function ProSuccess() {
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
         <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
       </header>
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>

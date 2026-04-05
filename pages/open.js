@@ -153,7 +153,7 @@ export default function OpenPage() {
           )}
           {!branding && (
             <>
-              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
               <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
             </>
           )}
@@ -211,7 +211,7 @@ export default function OpenPage() {
         )}
         {!branding && (
           <>
-            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
             <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
           </>
         )}
@@ -239,7 +239,7 @@ export default function OpenPage() {
           )}
           {branding && (
             <p style={{marginTop:'32px',textAlign:'center',color:'#999',fontSize:'13px'}}>
-              Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a>
+            Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 USC. Trademark Pending.  
             </p>
           )}
         </div>

@@ -19,7 +19,7 @@ export default function ProPage() {
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule</h1>
+        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
         <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
       </header>
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
@@ -40,6 +40,7 @@ export default function ProPage() {
           </button>
           <p style={{color:'#666',marginTop:'16px',fontSize:'14px'}}>Cancel anytime. No hidden fees.</p>
           <p style={{color:'#666',fontSize:'13px'}}><a href="/policy" style={{color:'#3182ce'}}>View Subscription & Refund Policy</a></p>
+          <p style={{color:'#999',fontSize:'12px',marginTop:'8px'}}>© 2026 USC. Trademark Pending.</p>
         </div>
       </main>
     </div>
