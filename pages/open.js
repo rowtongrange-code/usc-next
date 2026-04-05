@@ -147,17 +147,23 @@ export default function OpenPage() {
 
     return (
       <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
-        <header style={{background:accentColour,padding:'20px',textAlign:'center'}}>
-          {branding?.logo_url && (
-            <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
-          )}
-          {!branding && (
-            <>
-              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
-              <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
-            </>
-          )}
-        </header>
+        <header style={{background:accentColour,padding:'20px',textAlign:'center',position:'relative'}}>
+        {branding && (
+          <div style={{position:'absolute',top:'12px',right:'12px',background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'8px',padding:'4px 10px',display:'flex',alignItems:'center',gap:'4px'}}>
+            <span style={{fontSize:'12px'}}>🛡️</span>
+            <span style={{color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO</span>
+          </div>
+        )}
+        {branding?.logo_url && (
+          <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
+        )}
+        {!branding && (
+          <>
+            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
+            <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+          </>
+        )}
+      </header>
         <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
           <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)',textAlign:'center'}}>
             <div style={{fontSize:'64px',marginBottom:'16px'}}>🔒</div>
@@ -205,17 +211,23 @@ export default function OpenPage() {
 
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
-      <header style={{background:accentColour,padding:'20px',textAlign:'center'}}>
-        {branding?.logo_url && (
-          <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
-        )}
-        {!branding && (
-          <>
-            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
-            <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
-          </>
-        )}
-      </header>
+      <header style={{background:accentColour,padding:'20px',textAlign:'center',position:'relative'}}>
+          {branding && (
+            <div style={{position:'absolute',top:'12px',right:'12px',background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'8px',padding:'4px 10px',display:'flex',alignItems:'center',gap:'4px'}}>
+              <span style={{fontSize:'12px'}}>🛡️</span>
+              <span style={{color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO</span>
+            </div>
+          )}
+          {branding?.logo_url && (
+            <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
+          )}
+          {!branding && (
+            <>
+              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
+              <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+            </>
+          )}
+        </header>
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
         <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
           {branding?.sender_message && (
@@ -237,11 +249,17 @@ export default function OpenPage() {
               ))}
             </div>
           )}
-          {branding && (
-            <p style={{marginTop:'32px',textAlign:'center',color:'#999',fontSize:'13px'}}>
-            Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 USC. Trademark Pending.  
-            </p>
-          )}
+         {branding && (
+            <div style={{marginTop:'32px',textAlign:'center'}}>
+              <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'#fffbeb',border:'1px solid #f6e05e',borderRadius:'8px',padding:'8px 16px',marginBottom:'8px'}}>
+                <span style={{background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'4px',padding:'2px 8px',color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO VERIFIED</span>
+                <span style={{color:'#666',fontSize:'13px'}}>Delivered by {branding.email}</span>
+              </div>
+              <p style={{color:'#999',fontSize:'12px',margin:'4px 0 0'}}>
+                <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 USC. Trademark Pending.
+              </p>
+            </div>
+          )} 
         </div>
       </main>
     </div>
