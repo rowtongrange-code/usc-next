@@ -250,7 +250,7 @@ function OpenCapsule() {
       const capsuleUrl = urlObj.searchParams.get('url')
       const keyHex = urlObj.hash.slice(1)
       if (!capsuleUrl || !keyHex) return setError('This does not look like a valid capsule link')
-      await openCapsule(capsuleUrl, keyHex)
+      window.location.href = pastedLink
     } catch(e) {
       setError('This does not look like a valid capsule link')
     }
