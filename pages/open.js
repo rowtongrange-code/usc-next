@@ -200,7 +200,7 @@ export default function OpenPage() {
 
             {branding && (
               <p style={{marginTop:'32px',color:'#999',fontSize:'13px'}}>
-                Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a>
+              Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 Universal Send Capsule™  
               </p>
             )}
           </div>
@@ -256,7 +256,7 @@ export default function OpenPage() {
                 <span style={{color:'#666',fontSize:'13px'}}>Delivered by {branding.email}</span>
               </div>
               <p style={{color:'#999',fontSize:'12px',margin:'4px 0 0'}}>
-                <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 USC. Trademark Pending.
+                <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 Universal Send Capsule™
               </p>
             </div>
           )} 
