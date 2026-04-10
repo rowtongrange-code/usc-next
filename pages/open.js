@@ -259,7 +259,16 @@ export default function OpenPage() {
                 <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 Universal Send Capsule™
               </p>
             </div>
-          )} 
+          )}
+
+          {files.length > 0 && (
+            <div style={{marginTop:'24px',padding:'16px',background:'#f0fff4',borderRadius:'8px',textAlign:'center',border:'1px solid #9ae6b4'}}>
+              <p style={{margin:'0 0 12px',fontSize:'16px'}}>🚀 <strong>Want to send something like this?</strong></p>
+              <a href="https://universalsendcapsule.com" style={{display:'inline-block',background:'#3182ce',color:'white',padding:'12px 28px',borderRadius:'8px',textDecoration:'none',fontSize:'16px',fontWeight:'bold'}}>
+                Create Your Own Capsule
+              </a>
+            </div>
+          )}
         </div>
       </main>
     </div>
