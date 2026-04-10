@@ -40,7 +40,7 @@ export default function ProPage() {
           </button>
           <p style={{color:'#666',marginTop:'16px',fontSize:'14px'}}>Cancel anytime. No hidden fees.</p>
           <p style={{color:'#666',fontSize:'13px'}}><a href="/policy" style={{color:'#3182ce'}}>View Subscription & Refund Policy</a></p>
-          <p style={{color:'#999',fontSize:'12px',marginTop:'8px'}}>© 2026 USC. Trademark Pending.</p>
+          <p style={{color:'#999',fontSize:'12px',marginTop:'8px'}}>© 2026 Universal Send Capsule™</p>
         </div>
       </main>
     </div>
