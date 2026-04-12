@@ -93,7 +93,15 @@ export default function OpenPage() {
         const type = new TextDecoder().decode(decrypted.slice(offset, offset + typeLen)); offset += typeLen
         const dataLen = Number(new DataView(decrypted.buffer, decrypted.byteOffset + offset, 8).getBigUint64(0, true)); offset += 8
         const data = decrypted.slice(offset, offset + dataLen); offset += dataLen
-        parsed.push({ name, type, data })
+
+        // Generate preview URL for images
+        let previewUrl = null
+        if (type.startsWith('image/')) {
+          const blob = new Blob([data], { type })
+          previewUrl = URL.createObjectURL(blob)
+        }
+
+        parsed.push({ name, type, data, previewUrl })
       }
 
       setFiles(parsed)
@@ -148,22 +156,22 @@ export default function OpenPage() {
     return (
       <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
         <header style={{background:accentColour,padding:'20px',textAlign:'center',position:'relative'}}>
-        {branding && (
-          <div style={{position:'absolute',top:'12px',right:'12px',background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'8px',padding:'4px 10px',display:'flex',alignItems:'center',gap:'4px'}}>
-            <span style={{fontSize:'12px'}}>🛡️</span>
-            <span style={{color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO</span>
-          </div>
-        )}
-        {branding?.logo_url && (
-          <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
-        )}
-        {!branding && (
-          <>
-            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
-            <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
-          </>
-        )}
-      </header>
+          {branding && (
+            <div style={{position:'absolute',top:'12px',right:'12px',background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'8px',padding:'4px 10px',display:'flex',alignItems:'center',gap:'4px'}}>
+              <span style={{fontSize:'12px'}}>🛡️</span>
+              <span style={{color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO</span>
+            </div>
+          )}
+          {branding?.logo_url && (
+            <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
+          )}
+          {!branding && (
+            <>
+              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
+              <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+            </>
+          )}
+        </header>
         <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
           <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)',textAlign:'center'}}>
             <div style={{fontSize:'64px',marginBottom:'16px'}}>🔒</div>
@@ -200,7 +208,7 @@ export default function OpenPage() {
 
             {branding && (
               <p style={{marginTop:'32px',color:'#999',fontSize:'13px'}}>
-              Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 Universal Send Capsule™  
+                Delivered by {branding.email} · <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 Universal Send Capsule™
               </p>
             )}
           </div>
@@ -212,22 +220,22 @@ export default function OpenPage() {
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:accentColour,padding:'20px',textAlign:'center',position:'relative'}}>
-          {branding && (
-            <div style={{position:'absolute',top:'12px',right:'12px',background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'8px',padding:'4px 10px',display:'flex',alignItems:'center',gap:'4px'}}>
-              <span style={{fontSize:'12px'}}>🛡️</span>
-              <span style={{color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO</span>
-            </div>
-          )}
-          {branding?.logo_url && (
-            <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
-          )}
-          {!branding && (
-            <>
-              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
-              <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
-            </>
-          )}
-        </header>
+        {branding && (
+          <div style={{position:'absolute',top:'12px',right:'12px',background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'8px',padding:'4px 10px',display:'flex',alignItems:'center',gap:'4px'}}>
+            <span style={{fontSize:'12px'}}>🛡️</span>
+            <span style={{color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO</span>
+          </div>
+        )}
+        {branding?.logo_url && (
+          <img src={branding.logo_url} alt="Logo" style={{height:'50px',display:'block',margin:'0 auto 10px'}} />
+        )}
+        {!branding && (
+          <>
+            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
+            <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+          </>
+        )}
+      </header>
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
         <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
           {branding?.sender_message && (
@@ -242,14 +250,35 @@ export default function OpenPage() {
             <div style={{marginTop:'20px'}}>
               <p>Your capsule contains {files.length} file(s):</p>
               {files.map((file,i) => (
-                <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px',background:'#f7fafc',borderRadius:'6px',marginBottom:'8px'}}>
-                  <span>{file.name}</span>
-                  <button onClick={() => downloadFile(file)} style={{background:accentColour,color:'white',border:'none',padding:'6px 16px',borderRadius:'6px',cursor:'pointer'}}>Download</button>
+                <div key={i} style={{marginBottom:'16px',background:'#f7fafc',borderRadius:'8px',overflow:'hidden'}}>
+                  {file.previewUrl && (
+                    <div style={{position:'relative',overflow:'hidden',borderRadius:'8px 8px 0 0'}}>
+                      <img
+                        src={file.previewUrl}
+                        alt={file.name}
+                        style={{width:'100%',maxHeight:'200px',objectFit:'cover',filter:'blur(12px)',transform:'scale(1.05)'}}
+                      />
+                      <div style={{position:'absolute',bottom:'8px',left:'0',right:'0',textAlign:'center'}}>
+                        <span style={{background:'rgba(0,0,0,0.6)',color:'white',padding:'4px 12px',borderRadius:'12px',fontSize:'12px'}}>
+                          🔒 Preview blurred for security
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 12px'}}>
+                    <div>
+                      <span style={{fontWeight:'500'}}>{file.name}</span>
+                      <span style={{color:'#999',fontSize:'12px',marginLeft:'8px'}}>
+                        {(file.data.length / 1024 / 1024).toFixed(2)}MB
+                      </span>
+                    </div>
+                    <button onClick={() => downloadFile(file)} style={{background:accentColour,color:'white',border:'none',padding:'6px 16px',borderRadius:'6px',cursor:'pointer',flexShrink:0}}>Download</button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-         {branding && (
+          {branding && (
             <div style={{marginTop:'32px',textAlign:'center'}}>
               <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'#fffbeb',border:'1px solid #f6e05e',borderRadius:'8px',padding:'8px 16px',marginBottom:'8px'}}>
                 <span style={{background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'4px',padding:'2px 8px',color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO VERIFIED</span>
