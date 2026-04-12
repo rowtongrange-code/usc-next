@@ -265,14 +265,18 @@ export default function OpenPage() {
                       </div>
                     </div>
                   )}
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 12px'}}>
-                    <div>
-                      <span style={{fontWeight:'500'}}>{file.name}</span>
-                      <span style={{color:'#999',fontSize:'12px',marginLeft:'8px'}}>
-                        {(file.data.length / 1024 / 1024).toFixed(2)}MB
-                      </span>
+                  <div style={{padding:'10px 12px'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
+                      <div style={{minWidth:0}}>
+                        <span style={{fontWeight:'500',wordBreak:'break-all'}}>{file.name}</span>
+                        <span style={{color:'#999',fontSize:'12px',marginLeft:'8px'}}>
+                          {(file.data.length / 1024 / 1024).toFixed(2)}MB
+                        </span>
+                      </div>
+                      <button onClick={() => downloadFile(file)} style={{background:accentColour,color:'white',border:'none',padding:'8px 20px',borderRadius:'6px',cursor:'pointer',flexShrink:0,width:'100%',marginTop:'8px'}}>
+                        ⬇️ Download
+                      </button>
                     </div>
-                    <button onClick={() => downloadFile(file)} style={{background:accentColour,color:'white',border:'none',padding:'6px 16px',borderRadius:'6px',cursor:'pointer',flexShrink:0}}>Download</button>
                   </div>
                 </div>
               ))}
