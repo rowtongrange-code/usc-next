@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       body,
       request: req,
       onBeforeGenerateToken: async (pathname) => ({
-        allowedContentTypes: ['application/octet-stream'],
+        allowedContentTypes: ['application/octet-stream', 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
         addRandomSuffix: true,
         tokenPayload: JSON.stringify({}),
       }),
