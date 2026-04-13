@@ -9,6 +9,9 @@ export default function Dashboard() {
   const [senderMessage, setSenderMessage] = useState('')
   const [notificationEmail, setNotificationEmail] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
+  const [logoFile, setLogoFile] = useState(null)
+  const [logoPreview, setLogoPreview] = useState('')
+  const [uploadingLogo, setUploadingLogo] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -48,9 +51,45 @@ export default function Dashboard() {
         setSenderMessage(data.sender_message || '')
         setNotificationEmail(data.notification_email || '')
         setLogoUrl(data.logo_url || '')
+        if (data.logo_url) setLogoPreview(data.logo_url)
       }
     } catch (err) {
       // No existing settings
+    }
+  }
+
+  async function handleLogoChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) return setError('Please select an image file')
+    if (file.size > 2 * 1024 * 1024) return setError('Logo must be under 2MB')
+
+    setLogoFile(file)
+    setError('')
+
+    // Show local preview immediately
+    const reader = new FileReader()
+    reader.onload = (ev) => setLogoPreview(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+
+  async function uploadLogo() {
+    if (!logoFile) return logoUrl
+    setUploadingLogo(true)
+
+    try {
+      const { upload } = await import('@vercel/blob/client')
+      const blobResult = await upload(`logos/${email}-logo-${Date.now()}.${logoFile.name.split('.').pop()}`, logoFile, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      })
+      setLogoUrl(blobResult.url)
+      setUploadingLogo(false)
+      return blobResult.url
+    } catch (err) {
+      setError('Could not upload logo: ' + err.message)
+      setUploadingLogo(false)
+      return logoUrl
     }
   }
 
@@ -59,6 +98,11 @@ export default function Dashboard() {
     setError('')
 
     try {
+      let finalLogoUrl = logoUrl
+      if (logoFile) {
+        finalLogoUrl = await uploadLogo()
+      }
+
       const response = await fetch('/api/save-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,13 +111,14 @@ export default function Dashboard() {
           accent_colour: accentColour,
           sender_message: senderMessage,
           notification_email: notificationEmail,
-          logo_url: logoUrl,
+          logo_url: finalLogoUrl,
         })
       })
 
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
       setSaved(true)
+      setLogoFile(null)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
       setError('Could not save settings: ' + err.message)
@@ -123,14 +168,14 @@ export default function Dashboard() {
             </button>
 
             <div style={{marginTop:'24px',padding:'16px',background:'#f7fafc',borderRadius:'8px',textAlign:'center'}}>
-            <p style={{margin:'0 0 12px',color:'#666',fontSize:'14px'}}>Need to cancel or update your subscription?</p>
-            <a href="https://billing.stripe.com/p/login/cNieV7e3I0XA51rbGw5gc00" target="_blank" style={{display:'inline-block',background:'#e53e3e',color:'white',padding:'10px 24px',borderRadius:'8px',textDecoration:'none',fontSize:'14px'}}>
-              Manage My Subscription
-            </a>
-          </div>
-          <p style={{textAlign:'center',marginTop:'16px'}}>
-            <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
-          </p>
+              <p style={{margin:'0 0 12px',color:'#666',fontSize:'14px'}}>Need to cancel or update your subscription?</p>
+              <a href="https://billing.stripe.com/p/login/cNieV7e3I0XA51rbGw5gc00" target="_blank" style={{display:'inline-block',background:'#e53e3e',color:'white',padding:'10px 24px',borderRadius:'8px',textDecoration:'none',fontSize:'14px'}}>
+                Manage My Subscription
+              </a>
+            </div>
+            <p style={{textAlign:'center',marginTop:'16px'}}>
+              <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
+            </p>
           </div>
         </main>
       </div>
@@ -149,15 +194,19 @@ export default function Dashboard() {
           <p style={{color:'#666'}}>Customise how your capsules appear to recipients.</p>
 
           <div style={{marginBottom:'20px'}}>
-            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Logo URL</label>
+            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Logo</label>
+            {logoPreview && (
+              <div style={{marginBottom:'12px',padding:'12px',background:'#f7fafc',borderRadius:'8px',textAlign:'center'}}>
+                <img src={logoPreview} alt="Logo preview" style={{maxHeight:'60px',maxWidth:'200px',objectFit:'contain'}} />
+              </div>
+            )}
             <input
-              type="text"
-              value={logoUrl}
-              onChange={e => setLogoUrl(e.target.value)}
-              placeholder="https://yoursite.com/logo.png"
-              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box',background:'white'}}
             />
-            <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>Paste a link to your logo image</p>
+            <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>Upload your logo — JPG, PNG or SVG under 2MB</p>
           </div>
 
           <div style={{marginBottom:'20px'}}>
@@ -201,10 +250,10 @@ export default function Dashboard() {
 
           <button
             onClick={saveSettings}
-            disabled={saving}
+            disabled={saving || uploadingLogo}
             style={{background:'#3182ce',color:'white',border:'none',padding:'14px 32px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',width:'100%'}}
           >
-            {saving ? 'Saving...' : 'Save Branding Settings'}
+            {uploadingLogo ? 'Uploading logo...' : saving ? 'Saving...' : 'Save Branding Settings'}
           </button>
 
           <p style={{textAlign:'center',marginTop:'16px'}}>
