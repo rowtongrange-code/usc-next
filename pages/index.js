@@ -7,8 +7,13 @@ export default function Home() {
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-        <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
-        <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'12px'}}>
+  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/rowtongrange%40gmail.com-logo-1776552137100-RiYzCziPTlO6tsiFyHD1oZyCm81Ih9.png" alt="USC Logo" style={{height:'45px',width:'auto'}} />
+  <div>
+    <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
+    <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Send your work. Control how it's received.</p>
+  </div>
+</div>
         <div style={{marginTop:'16px',display:'flex',gap:'12px',justifyContent:'center',flexWrap:'wrap'}}>
           <button onClick={() => setView('create')} style={{background:'#3182ce',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>Create Capsule</button>
           <button onClick={() => setView('open')} style={{background:'#2c7a7b',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>Open Capsule</button>

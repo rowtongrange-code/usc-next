@@ -167,8 +167,13 @@ export default function OpenPage() {
           )}
           {!branding && (
             <>
-              <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
-              <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'12px'}}>
+  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/rowtongrange%40gmail.com-logo-1776552137100-RiYzCziPTlO6tsiFyHD1oZyCm81Ih9.png" alt="USC Logo" style={{height:'45px',width:'auto'}} />
+  <div>
+    <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
+    <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Send your work. Control how it's received.</p>
+  </div>
+</div>
             </>
           )}
         </header>
@@ -231,8 +236,13 @@ export default function OpenPage() {
         )}
         {!branding && (
           <>
-            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>📦 Universal Send Capsule™</h1>
-            <p style={{color:'#90cdf4',margin:'8px 0 0'}}>Send, receive and save anything. Simply.</p>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'12px'}}>
+  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/rowtongrange%40gmail.com-logo-1776552137100-RiYzCziPTlO6tsiFyHD1oZyCm81Ih9.png" alt="USC Logo" style={{height:'45px',width:'auto'}} />
+  <div>
+    <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
+    <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Send your work. Control how it's received.</p>
+  </div>
+</div>
           </>
         )}
       </header>
