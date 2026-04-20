@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [senderMessage, setSenderMessage] = useState('')
   const [notificationEmail, setNotificationEmail] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
+  const [senderName, setSenderName] = useState('')
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState('')
   const [uploadingLogo, setUploadingLogo] = useState(false)
@@ -52,6 +53,7 @@ export default function Dashboard() {
         setNotificationEmail(data.notification_email || '')
         setLogoUrl(data.logo_url || '')
         if (data.logo_url) setLogoPreview(data.logo_url)
+        setSenderName(data.sender_name || '')
       }
     } catch (err) {
       // No existing settings
@@ -108,6 +110,7 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
+          sender_name: senderName,
           accent_colour: accentColour,
           sender_message: senderMessage,
           notification_email: notificationEmail,
@@ -202,7 +205,17 @@ export default function Dashboard() {
         <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
           <h2 style={{color:'#1a365d',marginTop:0}}>Your Branding Settings</h2>
           <p style={{color:'#666'}}>Customise how your capsules appear to recipients.</p>
-
+<div style={{marginBottom:'20px'}}>
+            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Name</label>
+            <input
+              type="text"
+              value={senderName}
+              onChange={e => setSenderName(e.target.value)}
+              placeholder="e.g. Matthew"
+              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+            />
+            <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>This is how you'll appear to recipients</p>
+          </div>
           <div style={{marginBottom:'20px'}}>
             <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Logo</label>
             {logoPreview && (

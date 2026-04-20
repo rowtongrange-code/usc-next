@@ -11,11 +11,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, accent_colour, sender_message, notification_email, logo_url } = req.body
+    const { email, sender_name, accent_colour, sender_message, notification_email, logo_url } = req.body
 
     const { error } = await supabase
       .from('pro_users')
-      .upsert({ email, accent_colour, sender_message, notification_email, logo_url },
+      .upsert({ email, sender_name, accent_colour, sender_message, notification_email, logo_url },
         { onConflict: 'email' })
 
     if (error) throw error
