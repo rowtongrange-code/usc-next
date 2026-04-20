@@ -296,7 +296,7 @@ export default function OpenPage() {
             <div style={{marginTop:'32px',textAlign:'center'}}>
               <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'#fffbeb',border:'1px solid #f6e05e',borderRadius:'8px',padding:'8px 16px',marginBottom:'8px'}}>
                 <span style={{background:'linear-gradient(135deg, #d4a017, #f5c842)',borderRadius:'4px',padding:'2px 8px',color:'white',fontWeight:'bold',fontSize:'11px',letterSpacing:'0.5px'}}>PRO VERIFIED</span>
-                <span style={{color:'#666',fontSize:'13px'}}>Delivered by {branding.email}</span>
+                <span style={{color:'#666',fontSize:'13px'}}>Delivered by <strong>{branding.sender_name || branding.email}</strong> via Universal Send Capsule</span>
               </div>
               <p style={{color:'#999',fontSize:'12px',margin:'4px 0 0'}}>
                 <a href="/" style={{color:'#999'}}>Powered by USC</a> · © 2026 Universal Send Capsule™
