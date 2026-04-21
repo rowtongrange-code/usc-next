@@ -149,7 +149,8 @@ function CreateCapsule() {
         setUnlockLink(unlockLinkGenerated)
       }
 
-      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}${lockParam}#${keyHex}`
+      const nameParam = capsuleName ? `&name=${encodeURIComponent(capsuleName)}` : ''
+      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}${lockParam}${nameParam}#${keyHex}`
       setProgress('')
       setCapsuleLink(link)
     } catch (err) {
