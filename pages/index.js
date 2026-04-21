@@ -47,6 +47,7 @@ function CreateCapsule() {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState('')
   const [senderEmail, setSenderEmail] = useState('')
+  const [capsuleName, setCapsuleName] = useState('')
   const [unlockDate, setUnlockDate] = useState('')
   const [unlockTime, setUnlockTime] = useState('')
   const [isProVerified, setIsProVerified] = useState(false)
@@ -118,7 +119,12 @@ function CreateCapsule() {
       combined.set(encrypted, nonce.length)
 
       setProgress('Uploading your capsule...')
-      const filename = `capsule-${Date.now()}.enc`
+      const safeName = capsuleName 
+        ? capsuleName.replace(/[^a-zA-Z0-9_-]/g, '_') 
+        : (files.length === 1 
+          ? files[0].name.replace(/\.[^/.]+$/, '') 
+          : `${files.length}_files`)
+      const filename = `${safeName}.enc`
 
       const { upload } = await import('@vercel/blob/client')
       const blobResult = await upload(filename, new Blob([combined], { type: 'application/octet-stream' }), {
@@ -209,7 +215,17 @@ function CreateCapsule() {
           </div>
         </div>
       )}
-
+<div style={{marginBottom:'16px'}}>
+        <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Capsule Name (optional)</label>
+        <input
+          type="text"
+          value={capsuleName}
+          onChange={e => setCapsuleName(e.target.value)}
+          placeholder="e.g. Brand_Assets_Final"
+          style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+        />
+        <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>This is what your recipient will see as the download name</p>
+      </div>
       <input type="file" multiple onChange={e => setFiles(Array.from(e.target.files))} />
       {files.length > 0 && <p>{files.length} file(s) — {(files.reduce((a,f) => a+f.size,0)/1024/1024).toFixed(2)}mb</p>}
       <br/><br/>
