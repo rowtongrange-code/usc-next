@@ -278,7 +278,9 @@ export default function OpenPage() {
                   <div style={{padding:'10px 12px'}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
                       <div style={{minWidth:0}}>
-                        <span style={{fontWeight:'500',wordBreak:'break-all'}}>{file.name}</span>
+                        <span style={{fontWeight:'500',wordBreak:'break-all'}}>
+                          {new URLSearchParams(window.location.search).get('name') || file.name}
+                        </span>
                         <span style={{color:'#999',fontSize:'12px',marginLeft:'8px'}}>
                           {(file.data.length / 1024 / 1024).toFixed(2)}MB
                         </span>
