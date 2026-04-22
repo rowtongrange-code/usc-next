@@ -3,7 +3,7 @@ export default function Policy() {
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'12px'}}>
-  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png" alt="USC Logo" style={{height:'55px',width:'auto'}} />
+  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png" alt="USC Logo" style={{height:'70px',width:'auto'}} />
   <div>
     <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
     <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Send your work. Control how it's received.</p>
