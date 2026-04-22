@@ -204,7 +204,11 @@ export default function OpenPage() {
                 <p style={{margin:0,color:'#2d3748'}}>{branding.sender_message}</p>
               </div>
             )}
-
+<div style={{background:'#f0fff4',border:'1px solid #9ae6b4',borderRadius:'8px',padding:'12px 16px',marginTop:'24px'}}>
+              <p style={{margin:0,fontSize:'13px',color:'#276749'}}>
+                💡 <strong>Don't lose access</strong> — bookmark this page or save the link. You can return anytime to check the countdown.
+              </p>
+            </div>
             {senderEmail && (
               <p style={{color:'#999',fontSize:'14px',marginTop:'24px'}}>
                 Need it sooner? <a href={`mailto:${senderEmail}`} style={{color:accentColour}}>Contact {senderEmail} for an early release.</a>
