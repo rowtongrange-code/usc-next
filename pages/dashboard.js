@@ -81,7 +81,7 @@ export default function Dashboard() {
 
     try {
       const { upload } = await import('@vercel/blob/client')
-      const blobResult = await upload(`logos/${email}-logo-${Date.now()}.${logoFile.name.split('.').pop()}`, logoFile, {
+      const blobResult = await upload(`logos/usc-pro-logo-${Date.now()}.${logoFile.name.split('.').pop()}`, logoFile, {
         access: 'public',
         handleUploadUrl: '/api/upload',
       })
