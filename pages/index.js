@@ -42,13 +42,13 @@ function Home_Content() {
 
 function CreateCapsule() {
   const [files, setFiles] = useState([])
+  const [capsuleLink, setCapsuleLink] = useState('')
   const [capsuleName, setCapsuleName] = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
   const [unlockLink, setUnlockLink] = useState('')
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState('')
   const [senderEmail, setSenderEmail] = useState('')
-  const [capsuleName, setCapsuleName] = useState('')
   const [unlockDate, setUnlockDate] = useState('')
   const [unlockTime, setUnlockTime] = useState('')
   const [isProVerified, setIsProVerified] = useState(false)
@@ -228,6 +228,7 @@ function CreateCapsule() {
           style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
         />
         <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>This is what your recipient will see as the download name</p>
+      </div>
       <div style={{marginBottom:'16px'}}>
         <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Recipient's Email (optional)</label>
         <input
