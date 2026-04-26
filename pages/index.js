@@ -42,7 +42,8 @@ function Home_Content() {
 
 function CreateCapsule() {
   const [files, setFiles] = useState([])
-  const [capsuleLink, setCapsuleLink] = useState('')
+  const [capsuleName, setCapsuleName] = useState('')
+  const [recipientEmail, setRecipientEmail] = useState('')
   const [unlockLink, setUnlockLink] = useState('')
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState('')
@@ -150,7 +151,8 @@ function CreateCapsule() {
       }
 
       const nameParam = capsuleName ? `&name=${encodeURIComponent(capsuleName)}` : ''
-      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}${lockParam}${nameParam}#${keyHex}`
+      const recipientParam = recipientEmail ? `&recipient=${encodeURIComponent(recipientEmail)}` : ''
+      const link = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}${lockParam}${nameParam}${recipientParam}#${keyHex}`
       setProgress('')
       setCapsuleLink(link)
     } catch (err) {
@@ -226,6 +228,16 @@ function CreateCapsule() {
           style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
         />
         <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>This is what your recipient will see as the download name</p>
+      <div style={{marginBottom:'16px'}}>
+        <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Recipient's Email (optional)</label>
+        <input
+          type="email"
+          value={recipientEmail}
+          onChange={e => setRecipientEmail(e.target.value)}
+          placeholder="client@example.com"
+          style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
+        />
+        <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>We'll notify you when they open it</p>
       </div>
       <input type="file" multiple onChange={e => setFiles(Array.from(e.target.files))} />
       {files.length > 0 && <p>{files.length} file(s) — {(files.reduce((a,f) => a+f.size,0)/1024/1024).toFixed(2)}mb</p>}

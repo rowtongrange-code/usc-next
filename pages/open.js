@@ -109,6 +109,8 @@ export default function OpenPage() {
 
       const params2 = new URLSearchParams(window.location.search)
       const proEmail = params2.get('pro')
+      const recipientEmail = params2.get('recipient')
+
       if (proEmail) {
         const brandingRes = await fetch(`/api/get-branding?email=${encodeURIComponent(proEmail)}`)
         if (brandingRes.ok) {
@@ -117,10 +119,16 @@ export default function OpenPage() {
             fetch('/api/send-notification', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ notificationEmail: brandingData.notification_email, senderEmail: proEmail })
+              body: JSON.stringify({ notificationEmail: brandingData.notification_email, senderEmail: proEmail, recipientEmail })
             })
           }
         }
+      } else if (recipientEmail) {
+        fetch('/api/send-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationEmail: recipientEmail, senderEmail: null, recipientEmail, freeNotification: true })
+        })
       }
     } catch(e) {
       setError('Could not open capsule. The link may be invalid.')
