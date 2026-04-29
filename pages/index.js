@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import sodium from 'libsodium-wrappers'
-
+import { useState, useEffect } from 'react'
 export default function Home() {
   const [view, setView] = useState('home')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('shelf_asset')) {
+      setView('create')
+    }
+  }, [])
 
   return (
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
@@ -58,6 +65,17 @@ function CreateCapsule() {
   const [capsuleLink, setCapsuleLink] = useState('')
   const [capsuleName, setCapsuleName] = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
+  const [shelfAssetUrl, setShelfAssetUrl] = useState('')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const assetUrl = params.get('shelf_asset')
+    const assetName = params.get('shelf_name')
+    if (assetUrl) {
+      setShelfAssetUrl(assetUrl)
+      setCapsuleName(assetName || '')
+    }
+  }, [])
   const [unlockLink, setUnlockLink] = useState('')
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState('')
@@ -91,7 +109,7 @@ function CreateCapsule() {
   }
 
   async function createCapsule() {
-    if (files.length === 0) return alert('Please select at least one file')
+    if (files.length === 0 && !shelfAssetUrl) return alert('Please select at least one file')
     setLoading(true)
     setProgress('Preparing your files...')
 
@@ -140,11 +158,17 @@ function CreateCapsule() {
           : `${files.length}_files`)
       const filename = `${safeName}.enc`
 
-      const { upload } = await import('@vercel/blob/client')
-      const blobResult = await upload(filename, new Blob([combined], { type: 'application/octet-stream' }), {
-        access: 'public',
-        handleUploadUrl: '/api/upload',
-      })
+      let blobResult
+      if (shelfAssetUrl && files.length === 0) {
+        // Use shelf asset directly — no re-upload needed
+        blobResult = { url: shelfAssetUrl }
+      } else {
+        const { upload } = await import('@vercel/blob/client')
+        blobResult = await upload(filename, new Blob([combined], { type: 'application/octet-stream' }), {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
+        })
+      }
 
       const url = blobResult.url
       const keyHex = sodium.to_hex(key)
@@ -346,7 +370,11 @@ function OpenCapsule() {
     a.click()
     URL.revokeObjectURL(url)
   }
-
+{shelfAssetUrl && (
+        <div style={{marginBottom:'12px',padding:'12px',background:'#f0fff4',borderRadius:'8px',border:'1px solid #9ae6b4'}}>
+          <p style={{margin:0,color:'#276749',fontSize:'14px'}}>📂 <strong>Shelf asset loaded:</strong> {capsuleName}</p>
+        </div>
+      )}
   return (
     <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
       <h2>Open a Capsule</h2>
