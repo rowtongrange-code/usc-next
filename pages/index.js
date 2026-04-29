@@ -20,6 +20,19 @@ export default function Home() {
           <a href="/pro" style={{background:'#d69e2e',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',textDecoration:'none'}}>⭐ Go Pro</a>
           <a href="/dashboard" style={{background:'#553c9a',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',textDecoration:'none'}}>Dashboard</a>
         </div>
+        <a href="/shelf" style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:'12px',background:'rgba(255,255,255,0.1)',borderRadius:'10px',padding:'12px 16px',textDecoration:'none',border:'1px solid rgba(255,255,255,0.2)'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
+            <span style={{fontSize:'22px'}}>📂</span>
+            <div style={{textAlign:'left'}}>
+              <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                <span style={{color:'white',fontWeight:'bold',fontSize:'16px'}}>My Shelf</span>
+                <span style={{background:'#553c9a',color:'white',fontSize:'11px',fontWeight:'bold',padding:'2px 8px',borderRadius:'12px'}}>PRO</span>
+              </div>
+              <p style={{color:'#90cdf4',margin:0,fontSize:'13px'}}>Save your most-used files for one-tap delivery.</p>
+            </div>
+          </div>
+          <span style={{color:'white',fontSize:'20px'}}>›</span>
+        </a>
       </header>
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
         {view === 'home' && <Home_Content />}
