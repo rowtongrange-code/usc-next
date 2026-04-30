@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import sodium from 'libsodium-wrappers'
 import { useState, useEffect } from 'react'
+import sodium from 'libsodium-wrappers'
+
 export default function Home() {
   const [view, setView] = useState('home')
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    if (params.get('shelf_asset')) {
+    if (params.get('from_shelf') === 'true') {
       setView('create')
     }
   }, [])
@@ -15,12 +15,12 @@ export default function Home() {
     <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
       <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
         <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png" alt="USC Logo" style={{height:'70px',width:'auto'}} />
-  <div>
-    <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
-    <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Send your work. Control how it's received.</p>
-  </div>
-</div>
+          <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png" alt="USC Logo" style={{height:'70px',width:'auto'}} />
+          <div>
+            <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
+            <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Send your work. Control how it's received.</p>
+          </div>
+        </div>
         <div style={{marginTop:'16px',display:'flex',gap:'12px',justifyContent:'center',flexWrap:'wrap'}}>
           <button onClick={() => setView('create')} style={{background:'#3182ce',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>Create Capsule</button>
           <button onClick={() => setView('open')} style={{background:'#2c7a7b',color:'white',border:'none',padding:'10px 24px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>Open Capsule</button>
@@ -65,7 +65,16 @@ function CreateCapsule() {
   const [capsuleLink, setCapsuleLink] = useState('')
   const [capsuleName, setCapsuleName] = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
-  const [shelfAssetUrl, setShelfAssetUrl] = useState('')
+  const [unlockLink, setUnlockLink] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState('')
+  const [senderEmail, setSenderEmail] = useState('')
+  const [unlockDate, setUnlockDate] = useState('')
+  const [unlockTime, setUnlockTime] = useState('')
+  const [isProVerified, setIsProVerified] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [verifyError, setVerifyError] = useState('')
+  const [shelfLoaded, setShelfLoaded] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -80,6 +89,7 @@ function CreateCapsule() {
             const file = new File([blob], fileName, { type: fileType })
             setFiles([file])
             setCapsuleName(fileName.replace(/\.[^/.]+$/, ''))
+            setShelfLoaded(true)
             sessionStorage.removeItem('shelf_file_data')
             sessionStorage.removeItem('shelf_file_name')
             sessionStorage.removeItem('shelf_file_type')
@@ -87,15 +97,6 @@ function CreateCapsule() {
       }
     }
   }, [])
-  const [unlockLink, setUnlockLink] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState('')
-  const [senderEmail, setSenderEmail] = useState('')
-  const [unlockDate, setUnlockDate] = useState('')
-  const [unlockTime, setUnlockTime] = useState('')
-  const [isProVerified, setIsProVerified] = useState(false)
-  const [verifying, setVerifying] = useState(false)
-  const [verifyError, setVerifyError] = useState('')
 
   async function verifyPro() {
     if (!senderEmail) return setVerifyError('Please enter your email first')
@@ -120,7 +121,7 @@ function CreateCapsule() {
   }
 
   async function createCapsule() {
-    if (files.length === 0 && !shelfAssetUrl) return alert('Please select at least one file')
+    if (files.length === 0) return alert('Please select at least one file')
     setLoading(true)
     setProgress('Preparing your files...')
 
@@ -162,38 +163,29 @@ function CreateCapsule() {
       combined.set(encrypted, nonce.length)
 
       setProgress('Uploading your capsule...')
-      const safeName = capsuleName 
-        ? capsuleName.replace(/[^a-zA-Z0-9_-]/g, '_') 
-        : (files.length === 1 
-          ? files[0].name.replace(/\.[^/.]+$/, '') 
+      const safeName = capsuleName
+        ? capsuleName.replace(/[^a-zA-Z0-9_-]/g, '_')
+        : (files.length === 1
+          ? files[0].name.replace(/\.[^/.]+$/, '')
           : `${files.length}_files`)
       const filename = `${safeName}.enc`
 
-      let blobResult
-      if (shelfAssetUrl && files.length === 0) {
-        // Use shelf asset directly — no re-upload needed
-        blobResult = { url: shelfAssetUrl }
-      } else {
-        const { upload } = await import('@vercel/blob/client')
-        blobResult = await upload(filename, new Blob([combined], { type: 'application/octet-stream' }), {
-          access: 'public',
-          handleUploadUrl: '/api/upload',
-        })
-      }
+      const { upload } = await import('@vercel/blob/client')
+      const blobResult = await upload(filename, new Blob([combined], { type: 'application/octet-stream' }), {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      })
 
       const url = blobResult.url
       const keyHex = sodium.to_hex(key)
       const proParam = senderEmail ? `&pro=${encodeURIComponent(senderEmail)}` : ''
 
-      // Handle time lock — convert local time to UTC timestamp
       let lockParam = ''
       let unlockLinkGenerated = ''
       if (senderEmail && unlockDate && unlockTime) {
         const localDateTime = new Date(`${unlockDate}T${unlockTime}`)
         const utcTimestamp = localDateTime.getTime()
         lockParam = `&unlock=${utcTimestamp}`
-
-        // Generate the early unlock link (no lock param)
         unlockLinkGenerated = `${window.location.origin}/open?url=${encodeURIComponent(url)}${proParam}#${keyHex}`
         setUnlockLink(unlockLinkGenerated)
       }
@@ -215,6 +207,12 @@ function CreateCapsule() {
     <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
       <h2>Create a Capsule</h2>
       <p>Select one or more files to seal into your capsule.</p>
+
+      {shelfLoaded && (
+        <div style={{marginBottom:'16px',padding:'12px',background:'#f0fff4',borderRadius:'8px',border:'1px solid #9ae6b4'}}>
+          <p style={{margin:0,color:'#276749',fontSize:'14px'}}>📂 <strong>Shelf asset loaded:</strong> {capsuleName} — {(files.reduce((a,f) => a+f.size,0)/1024/1024).toFixed(2)}MB</p>
+        </div>
+      )}
 
       <div style={{marginBottom:'16px'}}>
         <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Email (Pro users only)</label>
@@ -238,9 +236,6 @@ function CreateCapsule() {
       </div>
 
       {isProVerified && (
-
-
-
         <div style={{marginBottom:'16px',padding:'16px',background:'#f7fafc',borderRadius:'8px',border:'1px solid #e2e8f0'}}>
           <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>⏰ Time Lock (optional)</label>
           <p style={{color:'#666',fontSize:'13px',marginTop:'0',marginBottom:'12px'}}>Set a date and time when your capsule will unlock. Leave blank for instant access.</p>
@@ -266,7 +261,8 @@ function CreateCapsule() {
           </div>
         </div>
       )}
-<div style={{marginBottom:'16px'}}>
+
+      <div style={{marginBottom:'16px'}}>
         <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Capsule Name (optional)</label>
         <input
           type="text"
@@ -277,6 +273,7 @@ function CreateCapsule() {
         />
         <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>This is what your recipient will see as the download name</p>
       </div>
+
       <div style={{marginBottom:'16px'}}>
         <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Recipient's Email (optional)</label>
         <input
@@ -288,8 +285,11 @@ function CreateCapsule() {
         />
         <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>We'll notify you when they open it</p>
       </div>
-      <input type="file" multiple onChange={e => setFiles(Array.from(e.target.files))} />
-      {files.length > 0 && <p>{files.length} file(s) — {(files.reduce((a,f) => a+f.size,0)/1024/1024).toFixed(2)}mb</p>}
+
+      {!shelfLoaded && (
+        <input type="file" multiple onChange={e => setFiles(Array.from(e.target.files))} />
+      )}
+      {files.length > 0 && !shelfLoaded && <p>{files.length} file(s) — {(files.reduce((a,f) => a+f.size,0)/1024/1024).toFixed(2)}mb</p>}
       <br/><br/>
       <button onClick={createCapsule} disabled={loading} style={{background:'#3182ce',color:'white',border:'none',padding:'12px 28px',borderRadius:'8px',cursor:'pointer',fontSize:'16px'}}>
         {loading ? 'Creating...' : 'Create Capsule'}
@@ -303,7 +303,6 @@ function CreateCapsule() {
           <button onClick={() => { navigator.clipboard.writeText(capsuleLink); alert('Link copied!') }} style={{marginTop:'8px',background:'#38a169',color:'white',border:'none',padding:'8px 20px',borderRadius:'6px',cursor:'pointer'}}>
             Copy Recipient Link
           </button>
-
           {unlockLink && (
             <div style={{marginTop:'16px',padding:'12px',background:'#fffbeb',borderRadius:'6px',border:'1px solid #f6e05e'}}>
               <p style={{fontWeight:'bold',margin:'0 0 4px',color:'#744210'}}>🔑 Your Early Unlock Link — Keep this private!</p>
@@ -339,39 +338,6 @@ function OpenCapsule() {
     }
   }
 
-  async function openCapsule(url, keyHex) {
-    try {
-      setStatus('Opening your capsule...')
-      await sodium.ready
-      const key = sodium.from_hex(keyHex)
-      const response = await fetch(url)
-      if (!response.ok) throw new Error('Could not fetch capsule')
-      const buffer = await response.arrayBuffer()
-      const combined = new Uint8Array(buffer)
-      const nonce = combined.slice(0, sodium.crypto_secretbox_NONCEBYTES)
-      const ciphertext = combined.slice(sodium.crypto_secretbox_NONCEBYTES)
-      const decrypted = sodium.crypto_secretbox_open_easy(ciphertext, nonce, key)
-
-      const parsed = []
-      let offset = 0
-      while (offset < decrypted.length) {
-        const nameLen = new DataView(decrypted.buffer, decrypted.byteOffset + offset, 4).getUint32(0, true); offset += 4
-        const name = new TextDecoder().decode(decrypted.slice(offset, offset + nameLen)); offset += nameLen
-        const typeLen = new DataView(decrypted.buffer, decrypted.byteOffset + offset, 4).getUint32(0, true); offset += 4
-        const type = new TextDecoder().decode(decrypted.slice(offset, offset + typeLen)); offset += typeLen
-        const dataLen = Number(new DataView(decrypted.buffer, decrypted.byteOffset + offset, 8).getBigUint64(0, true)); offset += 8
-        const data = decrypted.slice(offset, offset + dataLen); offset += dataLen
-        parsed.push({ name, type, data })
-      }
-
-      setFiles(parsed)
-      setStatus('Capsule opened successfully!')
-    } catch(e) {
-      setError('Could not open capsule. The link may be invalid.')
-      setStatus('')
-    }
-  }
-
   function downloadFile(file) {
     const blob = new Blob([file.data], { type: file.type })
     const url = URL.createObjectURL(blob)
@@ -381,11 +347,7 @@ function OpenCapsule() {
     a.click()
     URL.revokeObjectURL(url)
   }
-{shelfAssetUrl && (
-        <div style={{marginBottom:'12px',padding:'12px',background:'#f0fff4',borderRadius:'8px',border:'1px solid #9ae6b4'}}>
-          <p style={{margin:0,color:'#276749',fontSize:'14px'}}>📂 <strong>Shelf asset loaded:</strong> {capsuleName}</p>
-        </div>
-      )}
+
   return (
     <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
       <h2>Open a Capsule</h2>
