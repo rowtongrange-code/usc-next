@@ -114,7 +114,6 @@ export default function ShelfPage() {
       setSaved('')
     }
   }
-  }
 
   if (!verified) {
     return (
