@@ -69,11 +69,22 @@ function CreateCapsule() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const assetUrl = params.get('shelf_asset')
-    const assetName = params.get('shelf_name')
-    if (assetUrl) {
-      setShelfAssetUrl(assetUrl)
-      setCapsuleName(assetName || '')
+    if (params.get('from_shelf') === 'true') {
+      const fileData = sessionStorage.getItem('shelf_file_data')
+      const fileName = sessionStorage.getItem('shelf_file_name')
+      const fileType = sessionStorage.getItem('shelf_file_type')
+      if (fileData && fileName) {
+        fetch(fileData)
+          .then(r => r.blob())
+          .then(blob => {
+            const file = new File([blob], fileName, { type: fileType })
+            setFiles([file])
+            setCapsuleName(fileName.replace(/\.[^/.]+$/, ''))
+            sessionStorage.removeItem('shelf_file_data')
+            sessionStorage.removeItem('shelf_file_name')
+            sessionStorage.removeItem('shelf_file_type')
+          })
+      }
     }
   }, [])
   const [unlockLink, setUnlockLink] = useState('')

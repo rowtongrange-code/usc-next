@@ -93,8 +93,27 @@ export default function ShelfPage() {
     setAssets(updatedAssets)
   }
 
-  function capsuleAsset(asset) {
-    window.location.href = `/?shelf_asset=${encodeURIComponent(asset.url)}&shelf_name=${encodeURIComponent(asset.name)}`
+  async function capsuleAsset(asset) {
+    try {
+      setSaved('Loading asset...')
+      const response = await fetch(asset.url)
+      const blob = await response.blob()
+      const file = new File([blob], asset.name, { type: asset.type || blob.type })
+      
+      // Store in sessionStorage for index.js to pick up
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        sessionStorage.setItem('shelf_file_data', e.target.result)
+        sessionStorage.setItem('shelf_file_name', asset.name)
+        sessionStorage.setItem('shelf_file_type', asset.type || blob.type)
+        window.location.href = '/?from_shelf=true'
+      }
+      reader.readAsDataURL(file)
+    } catch (err) {
+      setError('Could not load asset: ' + err.message)
+      setSaved('')
+    }
+  }
   }
 
   if (!verified) {
