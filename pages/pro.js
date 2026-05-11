@@ -1,9 +1,10 @@
 import { loadStripe } from '@stripe/stripe-js'
 
+const USC_LOGO = "https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png"
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 export default function ProPage() {
- async function handleSubscribe() {
+  async function handleSubscribe() {
     try {
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
@@ -16,36 +17,57 @@ export default function ProPage() {
     }
   }
 
+  const features = [
+    '⭐ Your logo on every capsule',
+    '🎨 Custom accent colour',
+    '✉️ Custom sender message',
+    '🚫 Remove USC branding',
+    '📦 "Delivered by Your Brand" footer',
+    '🔔 Open notification email',
+    '🔒 Time Locked Capsules — seal & reveal on your schedule',
+    '📂 My Shelf — one-tap capsule delivery',
+  ]
+
   return (
-    <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
-      <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-        <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png" alt="USC Logo" style={{height:'70px',width:'auto'}} />
-  <div>
-    <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
-    <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Send your work. Control how it's received.</p>
-  </div>
-</div>
-      </header>
-      <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
-        <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)',textAlign:'center'}}>
-          <h2 style={{fontSize:'28px',color:'#1a365d'}}>USC Pro</h2>
-          <p style={{fontSize:'48px',fontWeight:'bold',color:'#3182ce',margin:'16px 0'}}>£10<span style={{fontSize:'18px',color:'#666'}}>/month</span></p>
-          <div style={{textAlign:'left',margin:'24px 0'}}>
-            <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Your logo on every capsule</p>
-            <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Custom accent colour</p>
-            <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Custom sender message</p>
-            <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Remove USC branding</p>
-            <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ "Delivered by Your Brand" footer</p>
-            <p style={{padding:'12px 0',borderBottom:'1px solid #eee'}}>✅ Open notification email</p>
-            <p style={{padding:'12px 0'}}>🔒 Time Locked Capsules — seal & reveal on your schedule</p>
+    <div style={{minHeight:'100vh',background:'#0d1117',fontFamily:'system-ui,sans-serif'}}>
+      <div style={{background:'#0d1117',borderBottom:'1px solid #21262d',padding:'16px 24px',display:'flex',alignItems:'center',gap:'12px'}}>
+        <img src={USC_LOGO} alt="USC" style={{height:'36px',width:'auto'}} />
+        <div>
+          <h1 style={{color:'white',margin:0,fontSize:'20px'}}>Universal Send Capsule™</h1>
+          <p style={{color:'#8b949e',margin:0,fontSize:'13px'}}>Go Pro</p>
+        </div>
+        <a href="/" style={{marginLeft:'auto',color:'#8b949e',fontSize:'13px',textDecoration:'none'}}>← Back</a>
+      </div>
+
+      <main style={{maxWidth:'560px',margin:'40px auto',padding:'0 20px'}}>
+        <div style={{background:'#161b22',borderRadius:'16px',padding:'32px',border:'1px solid #21262d',textAlign:'center'}}>
+          
+          <div style={{marginBottom:'24px'}}>
+            <h2 style={{color:'white',fontSize:'28px',margin:'0 0 8px'}}>USC Pro</h2>
+            <p style={{color:'#8b949e',margin:0,fontSize:'16px'}}>Everything you need to deliver work professionally</p>
           </div>
-          <button onClick={handleSubscribe} style={{background:'#3182ce',color:'white',border:'none',padding:'16px 48px',borderRadius:'8px',cursor:'pointer',fontSize:'18px',width:'100%'}}>
+
+          <div style={{background:'#0d1117',borderRadius:'12px',padding:'20px',marginBottom:'24px',border:'1px solid #21262d'}}>
+            <span style={{color:'white',fontSize:'52px',fontWeight:'700'}}>£10</span>
+            <span style={{color:'#8b949e',fontSize:'18px'}}>/month</span>
+          </div>
+
+          <div style={{textAlign:'left',marginBottom:'24px'}}>
+            {features.map((f, i) => (
+              <div key={i} style={{padding:'12px 0',borderBottom: i < features.length - 1 ? '1px solid #21262d' : 'none',color:'white',fontSize:'15px'}}>
+                {f}
+              </div>
+            ))}
+          </div>
+
+          <button onClick={handleSubscribe}
+            style={{background:'linear-gradient(135deg,#553c9a,#3b82f6)',color:'white',border:'none',padding:'16px 48px',borderRadius:'10px',cursor:'pointer',fontSize:'18px',width:'100%',fontWeight:'bold',marginBottom:'16px'}}>
             Subscribe for £10/month
           </button>
-          <p style={{color:'#666',marginTop:'16px',fontSize:'14px'}}>Cancel anytime. No hidden fees.</p>
-          <p style={{color:'#666',fontSize:'13px'}}><a href="/policy" style={{color:'#3182ce'}}>View Subscription & Refund Policy</a></p>
-          <p style={{color:'#999',fontSize:'12px',marginTop:'8px'}}>© 2026 Universal Send Capsule™</p>
+
+          <p style={{color:'#8b949e',fontSize:'14px',margin:'0 0 8px'}}>Cancel anytime. No hidden fees.</p>
+          <a href="/policy" style={{color:'#a78bfa',fontSize:'13px'}}>View Subscription & Refund Policy</a>
+          <p style={{color:'#8b949e',fontSize:'12px',marginTop:'16px'}}>© 2026 Universal Send Capsule™</p>
         </div>
       </main>
     </div>

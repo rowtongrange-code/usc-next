@@ -1,5 +1,8 @@
 import { useState } from 'react'
 
+const USC_LOGO = "https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png"
+const inputStyle = {width:'100%',padding:'10px',borderRadius:'8px',border:'1px solid #30363d',fontSize:'16px',boxSizing:'border-box',background:'#0d1117',color:'white'}
+
 export default function Dashboard() {
   const [email, setEmail] = useState('')
   const [checking, setChecking] = useState(false)
@@ -21,7 +24,6 @@ export default function Dashboard() {
     if (!email) return setError('Please enter your email address')
     setChecking(true)
     setError('')
-
     try {
       const response = await fetch('/api/check-subscriber', {
         method: 'POST',
@@ -29,7 +31,6 @@ export default function Dashboard() {
         body: JSON.stringify({ email })
       })
       const data = await response.json()
-
       if (data.subscribed) {
         setVerified(true)
         loadSettings()
@@ -39,7 +40,6 @@ export default function Dashboard() {
     } catch (err) {
       setError('Could not verify subscription: ' + err.message)
     }
-
     setChecking(false)
   }
 
@@ -55,9 +55,7 @@ export default function Dashboard() {
         if (data.logo_url) setLogoPreview(data.logo_url)
         setSenderName(data.sender_name || '')
       }
-    } catch (err) {
-      // No existing settings
-    }
+    } catch (err) {}
   }
 
   async function handleLogoChange(e) {
@@ -65,11 +63,8 @@ export default function Dashboard() {
     if (!file) return
     if (!file.type.startsWith('image/')) return setError('Please select an image file')
     if (file.size > 2 * 1024 * 1024) return setError('Logo must be under 2MB')
-
     setLogoFile(file)
     setError('')
-
-    // Show local preview immediately
     const reader = new FileReader()
     reader.onload = (ev) => setLogoPreview(ev.target.result)
     reader.readAsDataURL(file)
@@ -78,7 +73,6 @@ export default function Dashboard() {
   async function uploadLogo() {
     if (!logoFile) return logoUrl
     setUploadingLogo(true)
-
     try {
       const { upload } = await import('@vercel/blob/client')
       const blobResult = await upload(`logos/usc-pro-logo-${Date.now()}.${logoFile.name.split('.').pop()}`, logoFile, {
@@ -98,26 +92,14 @@ export default function Dashboard() {
   async function saveSettings() {
     setSaving(true)
     setError('')
-
     try {
       let finalLogoUrl = logoUrl
-      if (logoFile) {
-        finalLogoUrl = await uploadLogo()
-      }
-
+      if (logoFile) finalLogoUrl = await uploadLogo()
       const response = await fetch('/api/save-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          sender_name: senderName,
-          accent_colour: accentColour,
-          sender_message: senderMessage,
-          notification_email: notificationEmail,
-          logo_url: finalLogoUrl,
-        })
+        body: JSON.stringify({ email, sender_name: senderName, accent_colour: accentColour, sender_message: senderMessage, notification_email: notificationEmail, logo_url: finalLogoUrl })
       })
-
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
       setSaved(true)
@@ -126,64 +108,55 @@ export default function Dashboard() {
     } catch (err) {
       setError('Could not save settings: ' + err.message)
     }
-
     setSaving(false)
   }
 
+  const Header = ({ subtitle }) => (
+    <div style={{background:'#0d1117',borderBottom:'1px solid #21262d',padding:'16px 24px',display:'flex',alignItems:'center',gap:'12px'}}>
+      <img src={USC_LOGO} alt="USC" style={{height:'36px',width:'auto'}} />
+      <div>
+        <h1 style={{color:'white',margin:0,fontSize:'20px'}}>Universal Send Capsule™</h1>
+        <p style={{color:'#8b949e',margin:0,fontSize:'13px'}}>{subtitle}</p>
+      </div>
+      <a href="/" style={{marginLeft:'auto',color:'#8b949e',fontSize:'13px',textDecoration:'none'}}>← Back</a>
+    </div>
+  )
+
   if (!verified) {
     return (
-      <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
-        <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-          <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png" alt="USC Logo" style={{height:'70px',width:'auto'}} />
-  <div>
-    <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
-    <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Pro Dashboard</p>
-  </div>
-</div>
-        </header>
+      <div style={{minHeight:'100vh',background:'#0d1117',fontFamily:'system-ui,sans-serif'}}>
+        <Header subtitle="Pro Dashboard" />
         <main style={{maxWidth:'500px',margin:'40px auto',padding:'0 20px'}}>
-          <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
-            <h2 style={{color:'#1a365d',marginTop:0}}>Access Your Dashboard</h2>
-            <p style={{color:'#666'}}>Enter your email to access your Pro branding settings.</p>
+          <div style={{background:'#161b22',borderRadius:'12px',padding:'32px',border:'1px solid #21262d'}}>
+            <h2 style={{color:'white',marginTop:0}}>Access Your Dashboard</h2>
+            <p style={{color:'#8b949e'}}>Enter your email to access your Pro branding settings.</p>
 
             {notSubscribed && (
-              <div style={{background:'#fff5f5',border:'1px solid #feb2b2',borderRadius:'8px',padding:'16px',marginBottom:'20px'}}>
-                <p style={{color:'#c53030',margin:0}}>No active subscription found for this email.</p>
-                <a href="/pro" style={{color:'#3182ce',display:'block',marginTop:'8px'}}>Subscribe to USC Pro →</a>
+              <div style={{background:'#1a0a0a',border:'1px solid #7f1d1d',borderRadius:'8px',padding:'16px',marginBottom:'20px'}}>
+                <p style={{color:'#f87171',margin:0}}>No active subscription found for this email.</p>
+                <a href="/pro" style={{color:'#a78bfa',display:'block',marginTop:'8px'}}>Subscribe to USC Pro →</a>
               </div>
             )}
 
             <div style={{marginBottom:'20px'}}>
-              <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => { setEmail(e.target.value); setNotSubscribed(false) }}
-                placeholder="you@example.com"
-                style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
-              />
+              <label style={{display:'block',color:'#8b949e',marginBottom:'6px',fontSize:'14px'}}>Your Email Address</label>
+              <input type="email" value={email} onChange={e => { setEmail(e.target.value); setNotSubscribed(false) }} placeholder="you@example.com" style={inputStyle} />
             </div>
 
-            {error && <p style={{color:'red',marginBottom:'16px'}}>{error}</p>}
+            {error && <p style={{color:'#f87171',marginBottom:'16px'}}>{error}</p>}
 
-            <button
-              onClick={checkSubscription}
-              disabled={checking}
-              style={{background:'#3182ce',color:'white',border:'none',padding:'14px 32px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',width:'100%'}}
-            >
-              {checking ? 'Checking...' : 'Access Dashboard'}
+            <button onClick={checkSubscription} disabled={checking}
+              style={{background:'#553c9a',color:'white',border:'none',padding:'14px 32px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',width:'100%'}}>
+              {checking ? 'Checking...' : '⚙️ Access Dashboard'}
             </button>
 
-            <div style={{marginTop:'24px',padding:'16px',background:'#f7fafc',borderRadius:'8px',textAlign:'center'}}>
-              <p style={{margin:'0 0 12px',color:'#666',fontSize:'14px'}}>Need to cancel or update your subscription?</p>
-              <a href="https://billing.stripe.com/p/login/cNieV7e3I0XA51rbGw5gc00" target="_blank" style={{display:'inline-block',background:'#e53e3e',color:'white',padding:'10px 24px',borderRadius:'8px',textDecoration:'none',fontSize:'14px'}}>
+            <div style={{marginTop:'24px',padding:'16px',background:'#0d1117',borderRadius:'8px',border:'1px solid #21262d',textAlign:'center'}}>
+              <p style={{margin:'0 0 12px',color:'#8b949e',fontSize:'14px'}}>Need to cancel or update your subscription?</p>
+              <a href="https://billing.stripe.com/p/login/cNieV7e3I0XA51rbGw5gc00" target="_blank"
+                style={{display:'inline-block',background:'#7f1d1d',color:'white',padding:'10px 24px',borderRadius:'8px',textDecoration:'none',fontSize:'14px'}}>
                 Manage My Subscription
               </a>
             </div>
-            <p style={{textAlign:'center',marginTop:'16px'}}>
-              <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
-            </p>
           </div>
         </main>
       </div>
@@ -191,97 +164,61 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#f0f4f8',fontFamily:'system-ui,sans-serif'}}>
-      <header style={{background:'#1a365d',padding:'20px',textAlign:'center'}}>
-        <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-  <img src="https://wmycyifiudnidhn0.public.blob.vercel-storage.com/logos/usc-pro-logo-1776889474418-w5APeQTGMpuAt9U0RcaVc9AC3QtBqb.png" alt="USC Logo" style={{height:'70px',width:'auto'}} />
-  <div>
-    <h1 style={{color:'white',margin:0,fontSize:'28px'}}>Universal Send Capsule™</h1>
-    <p style={{color:'#90cdf4',margin:'4px 0 0'}}>Pro Dashboard</p>
-  </div>
-</div>
-      </header>
+    <div style={{minHeight:'100vh',background:'#0d1117',fontFamily:'system-ui,sans-serif'}}>
+      <Header subtitle="Pro Dashboard" />
       <main style={{maxWidth:'600px',margin:'40px auto',padding:'0 20px'}}>
-        <div style={{background:'white',borderRadius:'12px',padding:'32px',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
-          <h2 style={{color:'#1a365d',marginTop:0}}>Your Branding Settings</h2>
-          <p style={{color:'#666'}}>Customise how your capsules appear to recipients.</p>
-<div style={{marginBottom:'20px'}}>
-            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Name</label>
-            <input
-              type="text"
-              value={senderName}
-              onChange={e => setSenderName(e.target.value)}
-              placeholder="e.g. Matthew"
-              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
-            />
-            <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>This is how you'll appear to recipients</p>
-          </div>
+        <div style={{background:'#161b22',borderRadius:'12px',padding:'32px',border:'1px solid #21262d'}}>
+          <h2 style={{color:'white',marginTop:0}}>Your Branding Settings</h2>
+          <p style={{color:'#8b949e'}}>Customise how your capsules appear to recipients.</p>
+
           <div style={{marginBottom:'20px'}}>
-            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Your Logo</label>
-            {logoPreview && (
-              <div style={{marginBottom:'12px',padding:'12px',background:'#f7fafc',borderRadius:'8px',textAlign:'center'}}>
-                <img src={logoPreview} alt="Logo preview" style={{maxHeight:'60px',maxWidth:'200px',objectFit:'contain'}} />
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box',background:'white'}}
-            />
-            <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>Upload your logo — JPG, PNG or SVG under 2MB</p>
+            <label style={{display:'block',color:'#8b949e',marginBottom:'6px',fontSize:'14px'}}>Your Name</label>
+            <input type="text" value={senderName} onChange={e => setSenderName(e.target.value)} placeholder="e.g. Matthew" style={inputStyle} />
+            <p style={{color:'#8b949e',fontSize:'13px',marginTop:'4px'}}>This is how you'll appear to recipients</p>
           </div>
 
           <div style={{marginBottom:'20px'}}>
-            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Accent Colour</label>
+            <label style={{display:'block',color:'#8b949e',marginBottom:'6px',fontSize:'14px'}}>Your Logo</label>
+            {logoPreview && (
+              <div style={{marginBottom:'12px',padding:'12px',background:'#0d1117',borderRadius:'8px',textAlign:'center',border:'1px solid #21262d'}}>
+                <img src={logoPreview} alt="Logo preview" style={{maxHeight:'60px',maxWidth:'200px',objectFit:'contain'}} />
+              </div>
+            )}
+            <input type="file" accept="image/*" onChange={handleLogoChange}
+              style={{...inputStyle,padding:'8px'}} />
+            <p style={{color:'#8b949e',fontSize:'13px',marginTop:'4px'}}>Upload your logo — JPG, PNG or SVG under 2MB</p>
+          </div>
+
+          <div style={{marginBottom:'20px'}}>
+            <label style={{display:'block',color:'#8b949e',marginBottom:'6px',fontSize:'14px'}}>Accent Colour</label>
             <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-              <input
-                type="color"
-                value={accentColour}
-                onChange={e => setAccentColour(e.target.value)}
-                style={{width:'60px',height:'40px',borderRadius:'6px',border:'1px solid #ccc',cursor:'pointer'}}
-              />
-              <span style={{color:'#666'}}>{accentColour}</span>
+              <input type="color" value={accentColour} onChange={e => setAccentColour(e.target.value)}
+                style={{width:'60px',height:'40px',borderRadius:'6px',border:'1px solid #30363d',cursor:'pointer',background:'#0d1117'}} />
+              <span style={{color:'#8b949e'}}>{accentColour}</span>
             </div>
           </div>
 
           <div style={{marginBottom:'20px'}}>
-            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Sender Message</label>
-            <textarea
-              value={senderMessage}
-              onChange={e => setSenderMessage(e.target.value)}
+            <label style={{display:'block',color:'#8b949e',marginBottom:'6px',fontSize:'14px'}}>Sender Message</label>
+            <textarea value={senderMessage} onChange={e => setSenderMessage(e.target.value)}
               placeholder="e.g. Here are your project files. Let me know if you have any questions!"
-              rows={3}
-              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
-            />
+              rows={3} style={{...inputStyle,resize:'vertical'}} />
           </div>
 
           <div style={{marginBottom:'28px'}}>
-            <label style={{display:'block',fontWeight:'bold',marginBottom:'6px'}}>Open Notification Email</label>
-            <input
-              type="email"
-              value={notificationEmail}
-              onChange={e => setNotificationEmail(e.target.value)}
-              placeholder="notify@example.com"
-              style={{width:'100%',padding:'10px',borderRadius:'6px',border:'1px solid #ccc',fontSize:'16px',boxSizing:'border-box'}}
-            />
-            <p style={{color:'#666',fontSize:'13px',marginTop:'4px'}}>We'll email you when your capsule is opened</p>
+            <label style={{display:'block',color:'#8b949e',marginBottom:'6px',fontSize:'14px'}}>Open Notification Email</label>
+            <input type="email" value={notificationEmail} onChange={e => setNotificationEmail(e.target.value)}
+              placeholder="notify@example.com" style={inputStyle} />
+            <p style={{color:'#8b949e',fontSize:'13px',marginTop:'4px'}}>We'll email you when your capsule is opened</p>
           </div>
 
-          {error && <p style={{color:'red',marginBottom:'16px'}}>{error}</p>}
-          {saved && <p style={{color:'#38a169',marginBottom:'16px'}}>✅ Settings saved successfully!</p>}
+          {error && <p style={{color:'#f87171',marginBottom:'16px'}}>{error}</p>}
+          {saved && <p style={{color:'#4ade80',marginBottom:'16px'}}>✅ Settings saved successfully!</p>}
 
-          <button
-            onClick={saveSettings}
-            disabled={saving || uploadingLogo}
-            style={{background:'#3182ce',color:'white',border:'none',padding:'14px 32px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',width:'100%'}}
-          >
+          <button onClick={saveSettings} disabled={saving || uploadingLogo}
+            style={{background:'#3b82f6',color:'white',border:'none',padding:'14px 32px',borderRadius:'8px',cursor:'pointer',fontSize:'16px',width:'100%',fontWeight:'bold'}}>
             {uploadingLogo ? 'Uploading logo...' : saving ? 'Saving...' : 'Save Branding Settings'}
           </button>
-
-          <p style={{textAlign:'center',marginTop:'16px'}}>
-            <a href="/" style={{color:'#666',fontSize:'14px'}}>← Back to USC</a>
-          </p>
         </div>
       </main>
     </div>
